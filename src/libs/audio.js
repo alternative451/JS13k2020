@@ -1,30 +1,25 @@
+import { sonantxr_generate_song } from "./sonant_wrapper.js"
+
 var audio_ctx = new (window.webkitAudioContext||window.AudioContext)()
 
-var songBuffers = []
-function registerSong(songBuffer) {
-    return songBuffers.push(songBuffer) - 1
+const makeAsync = async (rawSound) => {
+  return new Promise((resolve) => {
+    sonantxr_generate_song(audio_ctx, rawSound, buffer => {
+      resolve(buffer)
+    })
+  })
 }
 
-var soundBuffers = []
-function registerSound(soundBuffer) {
-    return soundBuffers.push(soundBuffer) - 1
+export const Sound = async (rawSound) => {
+    
+  const buffer = await makeAsync(rawSound)
+  const source = audio_ctx.createBufferSource()
+  source.buffer = buffer
+  source.connect(audio_ctx.destination)
+
+  return (loop) => {
+    source.loop = loop
+    source.start()
+    return source
+  }
 }
-
-function audio_init(callback) {
-	sonantxr_generate_song(audio_ctx, music_dark_meat_beat, function(buffer){
-		audio_play(buffer, true);
-		callback();
-	});
-	sonantxr_generate_sound(audio_ctx, sound_shoot, 140, function(buffer){
-		audio_sfx_shoot = buffer;
-	});
-	
-};
-
-function audio_play(buffer, loop) {
-	var source = audio_ctx.createBufferSource();
-	source.buffer = buffer;
-	source.loop = loop;
-	source.connect(audio_ctx.destination);
-	source.start();
-};

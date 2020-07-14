@@ -1,6 +1,15 @@
-var sonantxr_generate_song, sonantxr_generate_sound;
+export const sonantxr_generate_song = function(audio_ctx, song_data, callback) {
+	var music_generator = new MusicGenerator(audio_ctx, song_data);
+	music_generator._createAudioBuffer(callback);
+};
+
+export const sonantxr_generate_sound = function(audio_ctx, instrument, note, callback) {
+	var sound_generator = new SoundGenerator(audio_ctx, instrument);
+	sound_generator._createAudioBuffer(note, callback);
+};
 
 
+const _math = Math
 var WAVE_SPS = 44100;					// Samples per second
 var MAX_TIME = 33; // maximum time, in millis, that the generator can use consecutively
 
@@ -271,12 +280,3 @@ MusicGenerator.prototype._createAudioBuffer = function(callBack) {
 };
 
 
-sonantxr_generate_song = function(audio_ctx, song_data, callback) {
-	var music_generator = new MusicGenerator(audio_ctx, song_data);
-	music_generator._createAudioBuffer(callback);
-};
-
-sonantxr_generate_sound = function(audio_ctx, instrument, note, callback) {
-	var sound_generator = new SoundGenerator(audio_ctx, instrument);
-	sound_generator._createAudioBuffer(note, callback);
-};
