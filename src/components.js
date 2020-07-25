@@ -6,6 +6,8 @@ export class Pos {
     }
 }
 
+
+
 export class Controlable {
     constructor() {
         this.isUp = false
