@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "watch": "webpack -w"
+    "watch": "webpack -w",
+    "server": "webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -20,8 +21,10 @@
   "homepage": "https://github.com/alternative451/JS13k2020#readme",
   "dependencies": {
     "html-webpack-plugin": "^4.3.0",
+    "js13k-ecs": "^0.1.4",
     "npm": "^6.14.6",
-    "webpack": "^4.43.0"
+    "webpack": "^4.43.0",
+    "webpack-dev-server": "^3.11.0"
   },
   "devDependencies": {
     "webpack-cli": "^3.3.12"
