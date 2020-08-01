@@ -27,6 +27,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "devDependencies": {
+    "glsl-shader-loader": "^0.1.6",
     "webpack-cli": "^3.3.12"
   }
 }

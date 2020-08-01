@@ -2,11 +2,37 @@
 
 ## vrac
 
-> ~Two player on same inputs~
+- Preblast area
+- repair the game
+- ECD items
+- Dash (i love dash)
 
-> WebGL (@MaximeEuzize)
+## DA
 
-> False 2D or Voxel
+- 3D Iso
+- Colorfull / colorless with mask
+- Impact text screen
+- Brutal design 
+
+## Techno
+
+- Sonant x
+- ECS
+- Screen managment
+- A*
+- Noise generator
+- AABB and SAT colision detection
+
+## Gameplay
+
+- Bomberman solo aventure
+- Cellular automata
+- 2 player coop
+- Simple TD
+- Deconstructed Raft
+- Rogue
+- Inertia
+- pocket universe
 
 ## progression 
 
@@ -17,8 +43,5 @@
 
 ## Tools
 
-> Sonant x
-
-> ECS
 
 
