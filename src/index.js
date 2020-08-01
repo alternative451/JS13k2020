@@ -3,17 +3,17 @@ import melodie from "./assets/audio/melo1.json";
 
 import ecs from "js13k-ecs";
 
-import { Pos, Controlable } from "./components.js";
-import { control, draw } from "./systems.js";
+import { Pos, Controlable, TrialState } from "./components.js";
+import { control, draw, trialDisplay } from "./systems.js";
 
 
 document.body.appendChild(document.createElement("canvas"))
 const cv = document.querySelector("canvas")
 const ctx = cv.getContext("2d") 
 
-ecs.register(Pos, Controlable)
+ecs.register(Pos, Controlable, TrialState)
 
-ecs.process(draw(ecs, ctx), control(ecs))
+ecs.process(draw(ecs, ctx), control(ecs), trialDisplay(ecs, ctx))
 
 /* sync () => {
   const melodieCurry = await Sound(melodie)
@@ -29,6 +29,12 @@ ecs
   .create()
   .add(
     new Pos(cv.width / 2, cv.height / 2, 0),
+    new Controlable(),
+  )
+ecs
+  .create()
+  .add(
+    new TrialState(),
     new Controlable(),
   )
 const loop = () => {

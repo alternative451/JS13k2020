@@ -30,3 +30,10 @@ export class Controlable {
         })
     }
 }
+
+export class TrialState {
+    constructor() {
+        this.isUpPressed = false
+        this.isDownPressed = false
+    }
+}
