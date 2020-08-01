@@ -36,12 +36,21 @@
 
 ## progression 
 
-> trial
+- trial
+- ascension 
 
-> ascension 
 
+## Themes
 
-## Tools
+- Back (2019)
+- Offline (2018)
+- Lost (2017)
+- Glitch (2016)
+- Reversed (2015)
+- The Elements: Earth, Water, Air and Fire (2014)
+- Bad luck (2013)
+- Number 13 (2012)
+
 
 
 
