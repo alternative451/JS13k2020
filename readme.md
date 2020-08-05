@@ -10,6 +10,7 @@
 ## DA
 
 - 3D Iso
+- Fixed screen (undermine)
 - Colorfull / colorless with mask
 - Impact text screen
 - Brutal design 
