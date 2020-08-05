@@ -4,6 +4,15 @@ export class Vector {
         this.y = y
         this.z = z
     }
+    setX(x) {
+        this.x = x
+    }
+    setY(y) {
+        this.y = y
+    }
+    setZ(z) {
+        this.z = z
+    }
     dot(v) {
         return this.x * v.x + this.y * v.y + this.z * v.z
     }

@@ -1,4 +1,4 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player } from "./components"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed } from "./components"
 import { Vector } from "./libs/vector"
 
 export const control = (ecs) => {
@@ -21,18 +21,20 @@ export const control = (ecs) => {
             selected.iterate((entity) => {
                 const {isUp, isDown, isLeft, isRight, isMain} = entity.get(Controlable)
                 const pos = entity.get(Pos)
+                const speed = entity.get(Speed)
                 if(isUp) {
-                    entity.get(Pos).y--
+                    speed.setY(-1)
                 }
                 if(isDown) {
-                    entity.get(Pos).y++
+                    speed.setY(1)
                 }
                 if(isLeft) {
-                    entity.get(Pos).x--
+                    speed.setX(-1)
                 }
                 if(isRight) {
-                    entity.get(Pos).x++
+                    speed.setX(1)
                 }
+                pos.add(speed)
                 if(isMain) {
                     ecs
                     .create()
@@ -130,7 +132,7 @@ export const liveBombs = (ecs) => {
                 if(bomb.timer < 0) {
                     entity.eject()
                     hostileSelected.iterate((hostileEntity) => {
-
+                        
                     })
                 }
 

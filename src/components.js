@@ -1,6 +1,8 @@
 import { Vector } from "./libs/vector"
 
 export class Pos extends Vector {}
+export class Speed extends Vector {}
+export class Acc extends Vector {}
 
 export class Spawn {
     constructor() {
