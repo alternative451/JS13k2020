@@ -119,3 +119,27 @@ export class Hostile {
 }
 
 export class Player {}
+
+export class UI {
+    constructor(text, x, y, fn) {
+        this.text = text
+        this.x = x
+        this.y = y
+        window.addEventListener("mousedown", (e) => {
+            if(Math.abs(e.pageX - x) < 100 && Math.abs(e.pageY - y) < 100) {
+                fn()
+            } 
+        })
+    }
+}
+
+export class Collidable {
+    constructor(xMin, yMin, xMax, yMax) {
+        this.xMin = xMin
+        this.yMin = yMin
+        this.xMax = xMax
+        this.yMax = yMax
+    }
+} 
+
+export class Wall extends Vector {}

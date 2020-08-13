@@ -1,4 +1,4 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed } from "./components"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable } from "./components"
 import { Vector } from "./libs/vector"
 
 export const control = (ecs) => {
@@ -50,16 +50,22 @@ export const control = (ecs) => {
 }
 
 
-export const draw = (ecs, ctx) => {
-    const selected = ecs.select(Pos, Shape)
- 
-    return {
+
+export const draw = (ecs, ctx, tileSize) => {
+    const selectedShape = ecs.select(Pos, Shape)
+    const selectedWalls = ecs.select(Wall)
+return {
 
         update : (dt) => {
-            selected.iterate((entity) => {
-                const pos = entity.get(Pos)
-                const shape = entity.get(Shape)
-                shape.draw(ctx, pos)
+            selectedShape.iterate((entityShape) => {
+                const pos = entityShape.get(Pos)
+                const shape = entityShape.get(Shape)
+                shape.draw(ctx, pos, tileSize)
+            })
+
+            selectedWalls.iterate((entityWall) => {
+                const wall = entityWall.get(Wall)
+                ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
         }
     }
@@ -75,7 +81,7 @@ export const liveSpawn = (ecs) => {
                 const spawner = entity.get(Spawn)
                 spawner.cd -= dt
                 if(spawner.cd < 0 && spawner.maxHostiles > 0) {
-                    spawner.maxHostiles ++
+                    spawner.maxHostiles --
                     spawner.cd = 3000
                     ecs.create()
                         .add(new Hostile(), new Pos(pos.x, pos.y, pos.z), new Shape(SMALL_CIRCLE))
@@ -135,9 +141,36 @@ export const liveBombs = (ecs) => {
                         
                     })
                 }
-
             })
             
+        }
+    }
+}
+
+export const liveUi = (ecs, ctx) => {
+    const selected = ecs.select(UI)
+    return {
+        update: () => {
+            selected.iterate((entity) => {
+                const ui = entity.get(UI)
+                ctx.fillText(ui.text, ui.x, ui.y)
+            })
+        }
+    }
+}
+
+export const collide = (ecs) => {
+    const selectedCollidable = ecs.select(Collidable)
+    const selectedWalls = ecs.select(Wall)
+    
+    return {
+        update: () => {
+            selectedWalls.iterate((entityWall) => {
+                selectedCollidable.iterate((entityCollidable) => {
+                    //AABB 
+                    
+                })
+            })
         }
     }
 }
