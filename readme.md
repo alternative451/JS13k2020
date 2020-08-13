@@ -4,7 +4,7 @@
 
 - Preblast area
 - repair the game
-- ECD items
+- EDC items
 - Dash (i love dash)
 
 ## DA
@@ -43,6 +43,7 @@
 
 ## Themes
 
+- 404 game (not) found (2020)
 - Back (2019)
 - Offline (2018)
 - Lost (2017)
@@ -51,6 +52,7 @@
 - The Elements: Earth, Water, Air and Fire (2014)
 - Bad luck (2013)
 - Number 13 (2012)
+
 
 
 
