@@ -170,25 +170,30 @@ export const liveUi = (ecs, ctx) => {
 }
 
 export const collide = (ecs) => {
-    const selectedCollidable = ecs.select(Collidable)
+    const selectedCollidable = ecs.select(Collidable, Speed, Pos)
     const selectedWalls = ecs.select(Wall)
     
     return {
         update: () => {
             selectedCollidable.iterate((entityCollidable) => {
                 const pos = entityCollidable.get(Pos)
+                const speed = entityCollidable.get(Speed)
                 const box = entityCollidable.get(Collidable)
                 if (pos.x + box.xMin < 0) {
                     pos.x = -box.xMin
+                    speed.x = -speed.x
                 }
                 if (pos.y + box.yMin < 0) {
                     pos.y = -box.yMin
+                    speed.y = -speed.y
                 }
                 if (pos.x - box.xMax > X_TILE_COUNT ) {
                     pos.x = X_TILE_COUNT + box.xMax
+                    speed.x = -speed.x
                 }
                 if (pos.y - box.yMax > Y_TILE_COUNT ) {
                     pos.y = Y_TILE_COUNT + box.yMax
+                    speed.y = -speed.y
                 }
                 selectedWalls.iterate((entityWall) => {
                     //AABB 
