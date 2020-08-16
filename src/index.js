@@ -6,6 +6,7 @@ import ecs from "js13k-ecs";
 import { Pos, Controlable, TrialState, Shape, CIRCLE, Bomb, Player, Hostile, Spawn, Speed, Acc, UI, Wall, Collidable } from "./components";
 import { control, draw, trialDisplay, liveBombs, liveSpawn, ia, liveUi, collide } from "./systems";
 import { title, arena } from "./screens.js"
+import { X_TILE_COUNT, Y_TILE_COUNT } from "./config.js";
 
 
 document.body.appendChild(document.createElement("canvas"))
@@ -13,9 +14,6 @@ const cv = document.querySelector("canvas")
 cv.width = window.innerWidth
 cv.height = window.innerHeight
 
-
-const X_TILE_COUNT = 20
-const Y_TILE_COUNT = 10
 const tileSize = Math.min(cv.width / X_TILE_COUNT, cv.height / Y_TILE_COUNT)
 
 

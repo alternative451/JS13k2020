@@ -1,4 +1,5 @@
 import { Vector } from "./libs/vector"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH } from "./config"
 
 export class Pos extends Vector {}
 export class Speed extends Vector {}
@@ -92,17 +93,17 @@ export const SQUARE = 1
 export const SMALL_CIRCLE = 2
 export class Shape {
     constructor(shape) {
-        this.draw = (ctx, pos) => {
+        this.draw = (ctx, pos, tileSize) => {
             ctx.fillStyle= "#134"
 
             if(shape === CIRCLE) {
                 ctx.beginPath()
-                ctx.arc(pos.x, pos.y, 16, 0, pi2)
+                ctx.arc(pos.x, pos.y, PLAYER_WIDTH * tileSize / 2, 0, pi2)
                 ctx.fill()
                 ctx.closePath()
             } else if(shape === SMALL_CIRCLE) {
                 ctx.beginPath()
-                ctx.arc(pos.x, pos.y, 8, 0, pi2)
+                ctx.arc(pos.x, pos.y, HOSTILE_WIDTH * tileSize / 4, 0, pi2)
                 ctx.closePath()
                 ctx.fill()
             } else {

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
+    "build": "ENV=production webpack",
     "watch": "webpack -w",
     "server": "webpack-dev-server --open"
   },
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/alternative451/JS13k2020#readme",
   "dependencies": {
+    "closure-webpack-plugin": "^2.3.0",
     "html-webpack-plugin": "^4.3.0",
     "js13k-ecs": "^0.1.4",
     "npm": "^6.14.6",

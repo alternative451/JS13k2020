@@ -43,6 +43,12 @@ export class Vector {
         this.z = Math.max( min.z, Math.min( max.z, this.z ) )
         return this
     }
+    clampScalar(minScalar, maxScalar) {
+        this.x = Math.max(minScalar, Math.min(maxScalar, this.x))
+        this.y = Math.max(minScalar, Math.min(maxScalar, this.y))
+        this.z = Math.max(minScalar, Math.min(maxScalar, this.z))
+        return this
+    }
     add(v) {
         this.x += v.x
         this.y += v.y

@@ -1,4 +1,5 @@
-import { Shape, Pos, Speed, Acc, Controlable, Player, Spawn, TrialState, CIRCLE, UI, Wall } from "./components"
+import { Shape, Pos, Speed, Acc, Controlable, Player, Spawn, TrialState, CIRCLE, UI, Wall, Collidable } from "./components"
+import { X_TILE_COUNT, Y_TILE_COUNT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
 
 export const title = (ecs, cv) => {
     return {
@@ -25,17 +26,18 @@ export const arena = (ecs, cv) => {
         .create()
         .add(
             new Shape(CIRCLE),
-            new Pos(cv.width / 2, cv.height / 2, 0),
+            new Pos(X_TILE_COUNT / 2, Y_TILE_COUNT / 2, 0),
             new Speed(0, 0, 0),
             new Acc(0, 0, 0),
             new Controlable(),
-            new Player()
+            new Player(),
+            new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2)
         )
     ecs
         .create()
         .add(
             new Spawn(),
-            new Pos(150, 150, 0),
+            new Pos(1, 5, 0),
         )
     ecs
         .create()
