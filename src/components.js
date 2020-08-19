@@ -1,5 +1,6 @@
 import { Vector } from "./libs/vector"
-import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH } from "./config"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES } from "./config"
+import { pi2 } from "./libs/utils"
 
 export class Pos extends Vector {}
 export class Speed extends Vector {}
@@ -12,9 +13,6 @@ export class Spawn {
     }
     
 }
-
-const pi2 = Math.PI * 2
-
 
 const Z = 90
 const W = 87
@@ -77,8 +75,9 @@ export class TrialState {
 }
 
 export class Bomb {
-    constructor(timer) {
+    constructor(timer, radius) {
         this.timer = timer
+        this.radius = radius
     }
 }
 
@@ -107,6 +106,7 @@ export class Shape {
                 ctx.closePath()
                 ctx.fill()
             } else {
+                ctx.stroke()
                 ctx.fillRect(pos.x - 8, pos.y - 8, 16, 16)
             }
         }
@@ -144,3 +144,65 @@ export class Collidable {
 } 
 
 export class Wall extends Vector {}
+
+export class BombSlot {
+    constructor(cd) {
+        this.cd = cd
+        this.isAvailable = true
+        this.roll()
+        this.bomb = null
+    }
+    use() {
+        const properties = BOMB_PROPERTIES[this.type]
+        this.bomb = new Bomb(properties.timer, properties.radius)
+        this.isAvailable = false
+        return this.bomb
+    }
+    roll() {
+        this.type = Math.floor(Math.random() * 6)
+        this.isAvailable = true
+    }
+}
+
+export class BombBag {
+    constructor(maxSize, cd) {
+        this.maxSize = maxSize 
+        this.bombSlots = []
+        for(let i = 0; i < maxSize; i ++) {
+            this.bombSlots.push(new BombSlot(cd))
+        }
+    }
+    isAvailable() {
+        for(let i = 0; i < this.bombSlots.length; i ++) {
+            if(this.bombSlots[i].isAvailable) {
+                return true
+            }
+        }
+        return false
+    }
+    isAllExploded() {
+        for (let i = 0; i < this.bombSlots.length; i++) {
+            if (!this.bombSlots[i].bomb) {
+                return false
+            }
+        }
+        for(let i = 0; i < this.bombSlots.length; i++) {
+             if(this.bombSlots[i].bomb.timer > 0) {
+                 return false
+             }
+        }
+        return true
+    }
+    useBomb() {
+        for(let i = 0; i < this.bombSlots.length; i ++) {
+            if(this.bombSlots[i].isAvailable) {
+                return this.bombSlots[i].use()
+            }
+        }
+    }
+    roll() {
+        for (let i = 0; i < this.bombSlots.length; i++) {
+            this.bombSlots[i].roll()
+        }
+    }
+}

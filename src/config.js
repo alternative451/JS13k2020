@@ -10,3 +10,31 @@ export const PLAYER_HEIGHT = 1
 
 export const HOSTILE_WIDTH = .5
 export const HOSTILE_SPEED = .1
+
+
+export const BOMB_PROPERTIES = [
+    {
+        radius: 1,
+        timer: 3000,
+    },
+    {
+        radius: 2,
+        timer: 3000,
+    },
+    {
+        radius: 3,
+        timer: 3000,
+    },
+    {
+        radius: 4,
+        timer: 3000,
+    },
+    {
+        radius: 5,
+        timer: 3000,
+    },
+    {
+        radius: 6,
+        timer: 3000,
+    }
+]

@@ -1,11 +1,13 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc } from "./components"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, Items, BombSac, BombBag } from "./components"
 import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION } from "./config"
-import { clamp } from "./libs/utils"
+import { clamp, pi2 } from "./libs/utils"
 import { Vector } from "./libs/vector"
 
 export const control = (ecs) => {
     const selected = ecs.select(Pos, Controlable)
     const trials = ecs.select(TrialState, Controlable)
+    const bombBagSelector = ecs.select(BombBag)
+    let bombAvailable = true
 
     return {
         update : (dt) => {
@@ -48,14 +50,26 @@ export const control = (ecs) => {
                 }
                 speed.add(acc).clampScalar(-PLAYER_SPEED, PLAYER_SPEED)
                 pos.add(speed)
-                if(isMain) {
-                    ecs
-                    .create()
-                    .add(
-                        new Bomb(3000), 
-                        new Pos(pos.x, pos.y, 0), 
-                        new Shape(SQUARE)
-                    )
+                if (!isMain && !bombAvailable) {
+                    bombAvailable = true
+                }
+                if (isMain && bombAvailable) {
+                    bombAvailable = false
+                    bombBagSelector.iterate((bombBagEntity) => {
+                        const bombBag = bombBagEntity.get(BombBag)
+                        if (bombBag.isAvailable()) {
+                            const bomb = bombBag.useBomb()
+                            ecs
+                                .create()
+                                .add(
+                                    bomb,
+                                    new Pos(pos.x, pos.y, 0),
+                                    new Shape(SQUARE)
+                                )
+                        }
+                        
+                    })
+                    
                 }
             })
         }
@@ -137,18 +151,30 @@ export const trialDisplay = (ecs, ctx) => {
     }
 }
 
-export const liveBombs = (ecs) => {
+export const liveBombs = (ecs, ctx, tileSize) => {
     const selected = ecs.select(Bomb)
     const hostileSelected = ecs.select(Hostile, Pos)
     return {
         update: (dt) => {
             selected.iterate((entity) => {
                 const bomb = entity.get(Bomb)
+                const pos = entity.get(Pos)
                 bomb.timer -= dt
+                const x = pos.x * tileSize
+                const y = pos.y * tileSize
+                ctx.beginPath()
+                ctx.arc(x, y, bomb.radius * tileSize, 0, pi2)
+                ctx.closePath()
+                ctx.stroke()
+                ctx.fillText(Math.ceil(bomb.timer / 1000), x, y - 20)
+
                 if(bomb.timer < 0) {
                     entity.eject()
                     hostileSelected.iterate((hostileEntity) => {
-                        
+                        const hostilePos = hostileEntity.get(Pos)
+                        if (hostilePos.distance2D(pos) < bomb.radius) {
+                            hostileEntity.eject()
+                        }
                     })
                 }
             })
@@ -187,37 +213,79 @@ export const collide = (ecs) => {
                     pos.y = -box.yMin
                     speed.y = -speed.y
                 }
-                if (pos.x - box.xMax > X_TILE_COUNT ) {
-                    pos.x = X_TILE_COUNT + box.xMax
+                if (pos.x - box.xMax > X_TILE_COUNT - 1 ) {
+                    pos.x = X_TILE_COUNT - 1 + box.xMax
                     speed.x = -speed.x
                 }
-                if (pos.y - box.yMax > Y_TILE_COUNT ) {
-                    pos.y = Y_TILE_COUNT + box.yMax
+                if (pos.y - box.yMax > Y_TILE_COUNT - 1 ) {
+                    pos.y = Y_TILE_COUNT - 1 + box.yMax
                     speed.y = -speed.y
                 }
                 selectedWalls.iterate((entityWall) => {
                     //AABB 
-                    return
-                    const pos = entityCollidable.get(Pos)
-                    const box = entityCollidable.get(Collidable)
                     const wall = entityWall.get(Wall)
-                    if (pos.x + box.xMin < wall.x && pos.x) {
-                        pos.x = -box.xMin + wall.x
+                    const fPos = pos.clone()
+                    // -->|
+                    if (pos.x + box.xMax > wall.x  
+                        && pos.x + box.xMax < wall.x + 1 
+                        && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) || 
+                        (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
+                        fPos.x = box.xMin + wall.x
+                        speed.x = -speed.x
                     }
-                    if (pos.y + box.yMin < 0) {
-                        pos.y = -box.yMin
+                    //  |<--
+                    if (pos.x + box.xMin > wall.x 
+                        && pos.x + box.xMin < wall.x + 1
+                        && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) ||
+                            (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
+                            fPos.x = box.xMax + wall.x + 1
+                            speed.x = -speed.x
                     }
-                    if (pos.x + box.xMax > X_TILE_COUNT) {
-                        pos.x = X_TILE_COUNT + box.xMax
+                    // __
+                    // /\
+                    if(pos.y + box.yMin > wall.y
+                        && pos.y + box.yMin < wall.y + 1
+                        && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) || 
+                        (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
+                        fPos.y = box.xMax + wall.y + 1
+                            speed.y = -speed.y
+                        }
+                    //  v
+                    // ---
+                    if(pos.y + box.xMax > wall.y 
+                        && pos.y + box.xMax < wall.y + 1
+                        && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) ||
+                            (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
+                        fPos.y = box.xMin + wall.y
+                        speed.y = -speed.y
                     }
-                    if (pos.y - box.yMax > Y_TILE_COUNT) {
-                        pos.y = Y_TILE_COUNT + box.yMax
-                    }
+                    pos.set(fPos)
                     
 
                     
                 })
             })
+        }
+    }
+}
+
+export const liveBombBag = (ecs, ctx, cv) => {
+    const bombBagSelector = ecs.select(BombBag)
+    return {
+        update() {
+            bombBagSelector.iterate((bombBagEntity) => {
+                const bombBag = bombBagEntity.get(BombBag)
+                for(let i = 1; i <= bombBag.bombSlots.length; i ++) {
+                    let bombSlot = bombBag.bombSlots[i-1]
+                    ctx.fillRect(cv.width - i * 105, cv.height - 100, 100, 100)
+                    ctx.fillText(bombSlot.isAvailable, cv.width - i * 105, cv.height - 100)
+                    ctx.fillText(bombSlot.type, cv.width - i * 105, cv.height - 110)
+                }
+                if (!bombBag.isAvailable() && bombBag.isAllExploded()) {
+                    bombBag.roll()
+                }
+            })
+            
         }
     }
 }

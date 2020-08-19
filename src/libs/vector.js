@@ -37,6 +37,9 @@ export class Vector {
     clone() {
         return new Vector(this.x, this.y, this.z)
     }
+    distance2D(v2) {
+        return Math.hypot(this.x - v2.x, this.y - v2.y)   
+    }
     clamp(min, max) {
         this.x = Math.max( min.x, Math.min( max.x, this.x ) )
 		this.y = Math.max( min.y, Math.min( max.y, this.y ) )
@@ -70,9 +73,12 @@ export class Vector {
     normalise() {
         return this.divideScalar(this.length())
     }
+    set(v) {
+        this.x = v.x
+        this.y = v.y
+        this.z = v.z
+    }
     toString() {
         return `${x} ${y} ${z}`
     }
 }
-
-

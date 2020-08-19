@@ -1,4 +1,4 @@
-import { Shape, Pos, Speed, Acc, Controlable, Player, Spawn, TrialState, CIRCLE, UI, Wall, Collidable } from "./components"
+import { Shape, Pos, Speed, Acc, Controlable, Player, Spawn, TrialState, CIRCLE, UI, Wall, Collidable, BombBag } from "./components"
 import { X_TILE_COUNT, Y_TILE_COUNT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
 
 export const title = (ecs, cv) => {
@@ -22,6 +22,10 @@ export const title = (ecs, cv) => {
 
 export const arena = (ecs, cv) => {
 
+    ecs.create() 
+        .add(
+            new BombBag(3, 3000)
+        )
     ecs
         .create()
         .add(
@@ -45,7 +49,7 @@ export const arena = (ecs, cv) => {
             new TrialState(),
             new Controlable(),
         )
-    const map = [0, 0, 19, 0, 0, 9, 19, 9]
+    const map = [0, 0, 19, 0, 0, 9, 19, 9, 5, 5, 6, 5, 7, 5]
     for(let i = 0; i < map.length; i += 2) {
         ecs
             .create()
