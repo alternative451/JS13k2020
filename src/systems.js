@@ -231,7 +231,7 @@ export const collide = (ecs) => {
                         && pos.x + box.xMax < wall.x + 1 
                         && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) || 
                         (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
-                        fPos.x = box.xMin + wall.x
+                        fPos.x = (box.xMin + wall.x) - (box.xMin + wall.x - fPos.x)
                         speed.x = -speed.x
                     }
                     //  |<--
@@ -240,7 +240,7 @@ export const collide = (ecs) => {
                         && pos.x + box.xMin < wall.x + 1
                         && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) ||
                             (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
-                            fPos.x = box.xMax + wall.x + 1
+                        fPos.x = (box.xMax + wall.x + 1) - (box.xMax + wall.x + 1 - fPos.x) 
                             speed.x = -speed.x
                     }
                     // __
@@ -250,7 +250,7 @@ export const collide = (ecs) => {
                         && pos.y + box.yMin < wall.y + 1
                         && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) || 
                         (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
-                        fPos.y = box.xMax + wall.y + 1
+                        fPos.y = (box.xMax + wall.y + 1) - (box.xMax + wall.y + 1 - fPos.y)
                             speed.y = -speed.y
                         }
                     //  v
@@ -260,7 +260,7 @@ export const collide = (ecs) => {
                         && pos.y + box.xMax < wall.y + 1
                         && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) ||
                             (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
-                        fPos.y = box.xMin + wall.y
+                        fPos.y = (box.xMin + wall.y) - (box.xMin + wall.y - fPos.y)
                         speed.y = -speed.y
                     }
                     pos.set(fPos)
