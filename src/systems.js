@@ -226,7 +226,8 @@ export const collide = (ecs) => {
                     const wall = entityWall.get(Wall)
                     const fPos = pos.clone()
                     // -->|
-                    if (pos.x + box.xMax > wall.x  
+                    if (speed.x > 0 &&
+                        pos.x + box.xMax > wall.x  
                         && pos.x + box.xMax < wall.x + 1 
                         && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) || 
                         (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
@@ -234,7 +235,8 @@ export const collide = (ecs) => {
                         speed.x = -speed.x
                     }
                     //  |<--
-                    if (pos.x + box.xMin > wall.x 
+                    if (speed.x < 0 &&
+                        pos.x + box.xMin > wall.x 
                         && pos.x + box.xMin < wall.x + 1
                         && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) ||
                             (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
@@ -243,7 +245,8 @@ export const collide = (ecs) => {
                     }
                     // __
                     // /\
-                    if(pos.y + box.yMin > wall.y
+                    if(speed.y < 0 &&
+                        pos.y + box.yMin > wall.y
                         && pos.y + box.yMin < wall.y + 1
                         && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) || 
                         (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
@@ -252,7 +255,8 @@ export const collide = (ecs) => {
                         }
                     //  v
                     // ---
-                    if(pos.y + box.xMax > wall.y 
+                    if(speed.y > 0 &&
+                        pos.y + box.xMax > wall.y 
                         && pos.y + box.xMax < wall.y + 1
                         && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) ||
                             (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {

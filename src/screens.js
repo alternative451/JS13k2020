@@ -49,7 +49,7 @@ export const arena = (ecs, cv) => {
             new TrialState(),
             new Controlable(),
         )
-    const map = [0, 0, 19, 0, 0, 9, 19, 9, 5, 5, 6, 5, 7, 5]
+    const map = [0, 0, 19, 0, 0, 9, 19, 9, 5, 5, 6, 5, 7, 5, 8, 5, 5, 6, 5, 7, 5, 8]
     for(let i = 0; i < map.length; i += 2) {
         ecs
             .create()
