@@ -4,8 +4,8 @@ import melodie from "./assets/audio/melo1.json";
 import ecs from "js13k-ecs";
 
 import { Pos, Controlable, TrialState, Shape, Bomb, Player, Hostile, Spawn, Speed, Acc, 
-  UI, Wall, Collidable, BombBag } from "./components";
-import { control, draw, trialDisplay, liveBombs, liveSpawn, ia, liveUi, collide, liveBombBag } from "./systems";
+  UI, Wall, Collidable, BombBag, Dead, PreBlast } from "./components";
+import { control, draw, trialDisplay, liveBombs, liveSpawn, ia, liveUi, collide, liveBombBag, liveDead, livePreBlast } from "./systems";
 import { title, arena } from "./screens.js"
 import { X_TILE_COUNT, Y_TILE_COUNT } from "./config.js";
 
@@ -21,10 +21,11 @@ const tileSize = Math.min(cv.width / X_TILE_COUNT, cv.height / Y_TILE_COUNT)
 const ctx = cv.getContext("2d") 
 
 ecs.register(Pos, Speed, Acc, Controlable, TrialState, Shape, Bomb, Player, Hostile, Spawn, UI, Wall,
-  Collidable, BombBag)
+  Collidable, Dead, BombBag, PreBlast)
 
 ecs.process(draw(ecs, ctx, tileSize), control(ecs), trialDisplay(ecs, ctx), 
-  liveBombs(ecs, ctx, tileSize), liveSpawn(ecs), ia(ecs), liveUi(ecs, ctx), collide(ecs), liveBombBag(ecs,ctx, cv))
+  liveBombs(ecs, ctx, tileSize), liveSpawn(ecs), ia(ecs), liveUi(ecs, ctx), collide(ecs), liveBombBag(ecs,ctx, cv), 
+  liveDead(ecs, ctx, tileSize), livePreBlast(ecs, ctx, tileSize))
 
 /* sync () => {
   const melodieCurry = await Sound(melodie)

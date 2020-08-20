@@ -1,5 +1,5 @@
 import { Vector } from "./libs/vector"
-import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES } from "./config"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES, PLAYER_HEIGHT } from "./config"
 import { pi2 } from "./libs/utils"
 
 export class Pos extends Vector {}
@@ -7,10 +7,15 @@ export class Speed extends Vector {}
 export class Acc extends Vector {}
 
 export class Spawn {
-    constructor() {
+    constructor(ecs) {
         this.cd = 3000
         this.maxHostiles = 3
+        for(let i = 0; i < this.maxHostiles; i ++) {
+            ecs.create()
+                .add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
+        }
     }
+
     
 }
 
@@ -113,9 +118,26 @@ export class Shape {
     }
 }
 
+export class Dead {
+    constructor(diedAt) {
+        this.diedAt = diedAt
+    }
+}
+
+export const EXPLODE_TYPE = 1
 export class Hostile {
-    constructor(target) {
+    constructor(target, type) {
         this.target = target
+        this.isActive = false
+        this.type = type
+        this.isAttacking = false
+    }
+}
+
+export class PreBlast {
+    constructor(hostile, at) {
+        this.hostile = hostile
+        this.at = at
     }
 }
 
@@ -206,3 +228,4 @@ export class BombBag {
         }
     }
 }
+

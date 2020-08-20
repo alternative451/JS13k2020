@@ -11,6 +11,11 @@ export const PLAYER_HEIGHT = 1
 export const HOSTILE_WIDTH = .5
 export const HOSTILE_SPEED = .1
 
+export const DEAD_LIVE = 3000
+
+export const BLAST_RADIUS = 2
+export const BLAST_TIME = 1000
+
 
 export const BOMB_PROPERTIES = [
     {

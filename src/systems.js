@@ -1,5 +1,5 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, Items, BombSac, BombBag } from "./components"
-import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION } from "./config"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, Items, BombSac, BombBag, Dead, PreBlast } from "./components"
+import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_TIME, BLAST_RADIUS } from "./config"
 import { clamp, pi2 } from "./libs/utils"
 import { Vector } from "./libs/vector"
 
@@ -98,17 +98,28 @@ export const draw = (ecs, ctx, tileSize) => {
 
 export const liveSpawn = (ecs) => {
     const selector = ecs.select(Spawn)
+    const hostileSelector = ecs.select(Hostile)
+
     return {
         update: (dt) => {
             selector.iterate((entity) => {
                 const pos = entity.get(Pos)
                 const spawner = entity.get(Spawn)
                 spawner.cd -= dt
-                if(spawner.cd < 0 && spawner.maxHostiles > 0) {
-                    spawner.maxHostiles --
+                if(spawner.cd < 0) {
                     spawner.cd = 3000
-                    ecs.create()
-                        .add(new Hostile(), new Pos(pos.x, pos.y, pos.z), new Shape(SMALL_CIRCLE))
+                    let oneCreated = false
+                    hostileSelector.iterate((hostileEntity) => {
+                        const hostile = hostileEntity.get(Hostile)
+                        if (!hostile.isActive && !oneCreated) {
+                            hostile.isActive = true
+                            const hpos = hostileEntity.get(Pos)
+                            hpos.set(pos)
+                            oneCreated = true
+
+                        }
+                    })
+
                 } 
             }) 
         }
@@ -123,12 +134,51 @@ export const ia = (ecs) => {
             playerSelector.iterate((playerEntity) => {
                 const playerPos = playerEntity.get(Pos) 
                 hostileSelector.iterate((entity) => {
-                    const hostilePos = entity.get(Pos)
-                    const d = playerPos.clone()
-                    const b = d.sub(entity.get(Pos))
-                    const n = b.normalise().multiplyScalar(HOSTILE_SPEED)
-                    hostilePos.add(n)
+                    const hostile = entity.get(Hostile)
+                    if (hostile.isActive) {
+                        const hostilePos = entity.get(Pos)
+
+                        // move toward player if no attacking
+                        if(!hostile.isAttacking) {
+                            const d = playerPos.clone()
+                            const b = d.sub(hostilePos)
+                            const n = b.normalise().multiplyScalar(HOSTILE_SPEED)
+                            hostilePos.add(n)
+                        }
+                        
+
+                        // try an attack
+                        if (playerPos.distance2D(hostilePos) < 1 && !hostile.isAttacking) {
+                            hostile.isAttacking = true
+                            ecs.create()
+                                .add(
+                                    new PreBlast(hostile, performance.now()),
+                                    new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
+                                )
+                        }
+                    }
                 })
+            })
+        }
+    }
+}
+
+export const livePreBlast = (ecs, ctx, tileSize) => {
+    const selected = ecs.select(PreBlast)
+    return {
+        update : () => {
+            selected.iterate((preblasEntity) => {
+                const preblast = preblasEntity.get(PreBlast)
+                const pos = preblasEntity.get(Pos)
+                ctx.beginPath()
+                ctx.arc(pos.x * tileSize, pos.y * tileSize, tileSize * BLAST_RADIUS, 0, pi2)
+                ctx.fillStyle = "rgba(200,200,200, .4)"
+                ctx.closePath()
+                ctx.fill()
+                if(performance.now() - preblast.at > BLAST_TIME ) {
+                    preblast.hostile.isAttacking = false
+                    preblasEntity.eject()
+                }
             })
         }
     }
@@ -172,13 +222,39 @@ export const liveBombs = (ecs, ctx, tileSize) => {
                     entity.eject()
                     hostileSelected.iterate((hostileEntity) => {
                         const hostilePos = hostileEntity.get(Pos)
+                        const hostile = hostileEntity.get(Hostile)
                         if (hostilePos.distance2D(pos) < bomb.radius) {
-                            hostileEntity.eject()
+                            hostile.isActive = false
+
+                            ecs.create()
+                            .add(
+                                new Dead(performance.now()), 
+                                new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
+                                
+                            )
                         }
                     })
                 }
             })
             
+        }
+    }
+}
+
+export const liveDead = (ecs, ctx, tileSize) => {
+    const deadSelector = ecs.select(Dead, Pos)
+    return {
+        update: () => {
+            deadSelector.iterate((deadEndity) => {
+                const pos = deadEndity.get(Pos)
+                const dead = deadEndity.get(Dead)
+
+                ctx.fillStyle = "#eee"
+                ctx.beginPath()
+                ctx.arc(pos.x * tileSize, pos.y * tileSize, 10, 0, pi2)
+                ctx.closePath()
+                ctx.fill()
+            })
         }
     }
 }
@@ -231,7 +307,7 @@ export const collide = (ecs) => {
                         && pos.x + box.xMax < wall.x + 1 
                         && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) || 
                         (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
-                        fPos.x = (box.xMin + wall.x) - (box.xMin + wall.x - fPos.x)
+                        fPos.x = (box.xMin + wall.x) + (box.xMin + wall.x - fPos.x)
                         speed.x = -speed.x
                     }
                     //  |<--
@@ -240,7 +316,9 @@ export const collide = (ecs) => {
                         && pos.x + box.xMin < wall.x + 1
                         && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) ||
                             (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
-                        fPos.x = (box.xMax + wall.x + 1) - (box.xMax + wall.x + 1 - fPos.x) 
+                        console.log((box.xMax + wall.x + 1 - fPos.x) )
+
+                        fPos.x = (box.xMax + wall.x + 1) + (box.xMax + wall.x + 1 - fPos.x) 
                             speed.x = -speed.x
                     }
                     // __
@@ -250,7 +328,7 @@ export const collide = (ecs) => {
                         && pos.y + box.yMin < wall.y + 1
                         && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) || 
                         (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
-                        fPos.y = (box.xMax + wall.y + 1) - (box.xMax + wall.y + 1 - fPos.y)
+                        fPos.y = (box.xMax + wall.y + 1) + (box.xMax + wall.y + 1 - fPos.y)
                             speed.y = -speed.y
                         }
                     //  v
@@ -260,7 +338,7 @@ export const collide = (ecs) => {
                         && pos.y + box.xMax < wall.y + 1
                         && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) ||
                             (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
-                        fPos.y = (box.xMin + wall.y) - (box.xMin + wall.y - fPos.y)
+                        fPos.y = (box.xMin + wall.y) + (box.xMin + wall.y - fPos.y)
                         speed.y = -speed.y
                     }
                     pos.set(fPos)
@@ -293,3 +371,4 @@ export const liveBombBag = (ecs, ctx, cv) => {
         }
     }
 }
+
