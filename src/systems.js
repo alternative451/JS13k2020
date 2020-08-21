@@ -137,13 +137,14 @@ export const ia = (ecs) => {
                     const hostile = entity.get(Hostile)
                     if (hostile.isActive) {
                         const hostilePos = entity.get(Pos)
+                        const hostileSpeed = entity.get(Speed)
 
                         // move toward player if no attacking
                         if(!hostile.isAttacking) {
                             const d = playerPos.clone()
                             const b = d.sub(hostilePos)
-                            const n = b.normalise().multiplyScalar(HOSTILE_SPEED)
-                            hostilePos.add(n)
+                            hostileSpeed.set(b.normalise().multiplyScalar(HOSTILE_SPEED))
+                            hostilePos.add(hostileSpeed)
                         }
                         
 
@@ -360,9 +361,6 @@ export const collide = (ecs) => {
                         speed.y = -speed.y
                     }
                     pos.set(fPos)
-                    
-
-                    
                 })
             })
         }

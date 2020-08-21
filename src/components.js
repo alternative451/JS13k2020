@@ -13,7 +13,7 @@ export class Spawn {
         this.maxHostiles = 3
         for(let i = 0; i < this.maxHostiles; i ++) {
             ecs.create()
-                .add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
+                .add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
         }
     }
 
