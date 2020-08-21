@@ -1,5 +1,5 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, Items, BombSac, BombBag, Dead, PreBlast } from "./components"
-import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_TIME, BLAST_RADIUS } from "./config"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, Items, BombSac, BombBag, Dead, PreBlast, Blast } from "./components"
+import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS } from "./config"
 import { clamp, pi2 } from "./libs/utils"
 import { Vector } from "./libs/vector"
 
@@ -163,8 +163,11 @@ export const ia = (ecs) => {
     }
 }
 
-export const livePreBlast = (ecs, ctx, tileSize) => {
+export const livePreBlast = (ecs, ctx, tileSize, cv) => {
     const selected = ecs.select(PreBlast)
+    const selectedPlayer = ecs.select(Player)
+    const bombBagSelector = ecs.select(BombBag)
+
     return {
         update : () => {
             selected.iterate((preblasEntity) => {
@@ -175,9 +178,24 @@ export const livePreBlast = (ecs, ctx, tileSize) => {
                 ctx.fillStyle = "rgba(200,200,200, .4)"
                 ctx.closePath()
                 ctx.fill()
-                if(performance.now() - preblast.at > BLAST_TIME ) {
+                if (performance.now() - preblast.at > PRE_BLAST_DURATION ) {
+                    selectedPlayer.iterate((playerEntity) => {
+                        const playerPos = playerEntity.get(Pos)
+                        if (pos.distance2D(playerPos) < BLAST_RADIUS) {
+                            bombBagSelector.iterate((bombBagEntity) => {
+                                bombBagEntity.get(BombBag).disable(ecs, cv)
+                            })
+                        }
+                    })
+
+
                     preblast.hostile.isAttacking = false
                     preblasEntity.eject()
+                    ecs.create()
+                    .add(
+                        new Pos(pos.x, pos.y, pos.z),
+                        new Blast(performance.now())
+                    )
                 }
             })
         }
@@ -359,6 +377,7 @@ export const liveBombBag = (ecs, ctx, cv) => {
                 const bombBag = bombBagEntity.get(BombBag)
                 for(let i = 1; i <= bombBag.bombSlots.length; i ++) {
                     let bombSlot = bombBag.bombSlots[i-1]
+                    ctx.fillStyle = bombSlot.isDisabled ? "rgba(200, 30, 30, .5)" : "rgba(30, 130, 30, .5)"
                     ctx.fillRect(cv.width - i * 105, cv.height - 100, 100, 100)
                     ctx.fillText(bombSlot.isAvailable, cv.width - i * 105, cv.height - 100)
                     ctx.fillText(bombSlot.type, cv.width - i * 105, cv.height - 110)
@@ -372,3 +391,23 @@ export const liveBombBag = (ecs, ctx, cv) => {
     }
 }
 
+export const liveBlast = (ecs, ctx, tileSize) => {
+    const selector = ecs.select(Blast)
+    return {
+        update : (dt) => {  
+            selector.iterate((blastEntity) => {
+                const blast = blastEntity.get(Blast)
+                if (performance.now() - blast.at > BLAST_DURATION) {
+                    blastEntity.eject()
+                    return
+                }
+                const pos = blastEntity.get(Pos)
+                ctx.beginPath()
+                ctx.fillStyle = "rgba(200, 30, 30, .7)"
+                ctx.arc(pos.x * tileSize, pos.y * tileSize, BLAST_RADIUS * tileSize, 0, pi2)
+                ctx.closePath()
+                ctx.fill()
+            })
+        }
+    }
+}

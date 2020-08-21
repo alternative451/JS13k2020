@@ -58,3 +58,9 @@ export const arena = (ecs, cv) => {
             )
         }
     }
+
+
+export const dieScreen = (ecs, cv) => {
+        ecs.create()
+            .add(new UI("You died", cv.width / 2, cv.height / 2, () => {}))
+    } 

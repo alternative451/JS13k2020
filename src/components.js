@@ -1,6 +1,7 @@
 import { Vector } from "./libs/vector"
 import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES, PLAYER_HEIGHT } from "./config"
 import { pi2 } from "./libs/utils"
+import { dieScreen } from "./screens"
 
 export class Pos extends Vector {}
 export class Speed extends Vector {}
@@ -148,11 +149,15 @@ export class UI {
         this.text = text
         this.x = x
         this.y = y
-        window.addEventListener("mousedown", (e) => {
-            if(Math.abs(e.pageX - x) < 100 && Math.abs(e.pageY - y) < 100) {
+        this.add = (e) => {
+            if (Math.abs(e.pageX - x) < 100 && Math.abs(e.pageY - y) < 100) {
                 fn()
-            } 
-        })
+            }
+        }
+        window.addEventListener("mousedown", this.add)
+    }
+    destructor() {
+        window.removeEventListener("mousedown", this.add)
     }
 }
 
@@ -171,6 +176,7 @@ export class BombSlot {
     constructor(cd) {
         this.cd = cd
         this.isAvailable = true
+        this.isDisabled = false
         this.roll()
         this.bomb = null
     }
@@ -189,6 +195,7 @@ export class BombSlot {
 export class BombBag {
     constructor(maxSize, cd) {
         this.maxSize = maxSize 
+        this.disabled = 0
         this.bombSlots = []
         for(let i = 0; i < maxSize; i ++) {
             this.bombSlots.push(new BombSlot(cd))
@@ -196,7 +203,7 @@ export class BombBag {
     }
     isAvailable() {
         for(let i = 0; i < this.bombSlots.length; i ++) {
-            if(this.bombSlots[i].isAvailable) {
+            if (this.bombSlots[i].isAvailable && !this.bombSlots[i].isDisabled) {
                 return true
             }
         }
@@ -217,15 +224,44 @@ export class BombBag {
     }
     useBomb() {
         for(let i = 0; i < this.bombSlots.length; i ++) {
-            if(this.bombSlots[i].isAvailable) {
+            if (this.bombSlots[i].isAvailable && !this.bombSlots[i].isDisabled) {
                 return this.bombSlots[i].use()
             }
         }
     }
     roll() {
         for (let i = 0; i < this.bombSlots.length; i++) {
-            this.bombSlots[i].roll()
+            if (!this.bombSlots[i].isDisabled) {
+                this.bombSlots[i].roll()
+            }
+        }
+    }
+    disable(ecs, cv) {
+        this.disabled ++
+        if(this.disabled === this.maxSize) {
+            window.currentScreen = dieScreen(ecs, cv)
+        }
+        for(let i = 0; i < this.bombSlots.length; i ++) {
+            if(!this.bombSlots[i].isDisabled) {
+                this.bombSlots[i].isDisabled = true
+                return
+            }
+        }
+    }
+    enable() {
+        this.disabled --
+        for (let i = 0; i < this.bombSlots.length; i++) {
+            if (this.bombSlots[i].isDisabled) {
+                this.bombSlots[i].isDisabled = false
+                return
+            }
         }
     }
 }
 
+
+export class Blast {
+    constructor(at) {
+        this.at = at
+    }
+}

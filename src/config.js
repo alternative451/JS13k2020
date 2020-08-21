@@ -14,7 +14,9 @@ export const HOSTILE_SPEED = .1
 export const DEAD_LIVE = 3000
 
 export const BLAST_RADIUS = 2
-export const BLAST_TIME = 1000
+export const PRE_BLAST_DURATION = 1000
+export const BLAST_DURATION = 300
+
 
 
 export const BOMB_PROPERTIES = [
