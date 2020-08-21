@@ -379,6 +379,7 @@ export const liveBombBag = (ecs, ctx, cv) => {
                     let bombSlot = bombBag.bombSlots[i-1]
                     ctx.fillStyle = bombSlot.isDisabled ? "rgba(200, 30, 30, .5)" : "rgba(30, 130, 30, .5)"
                     ctx.fillRect(cv.width - i * 105, cv.height - 100, 100, 100)
+                    ctx.fillStyle = "#000"
                     ctx.fillText(bombSlot.isAvailable, cv.width - i * 105, cv.height - 100)
                     ctx.fillText(bombSlot.type, cv.width - i * 105, cv.height - 110)
                 }
