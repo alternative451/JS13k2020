@@ -40,7 +40,7 @@ export const arena = (ecs, cv) => {
     ecs
         .create()
         .add(
-            new Spawn(ecs),
+           // new Spawn(ecs),
             new Pos(1, 5, 0),
         )
     ecs

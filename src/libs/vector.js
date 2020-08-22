@@ -16,6 +16,12 @@ export class Vector {
     dot(v) {
         return this.x * v.x + this.y * v.y + this.z * v.z
     }
+    dot2D(v) {
+       return this.x * v.x + this.y * v.y
+    }
+    angle() {
+        return Math.atan2(this.y, this.x)
+    }
     setScalar(scalar) {
         this.x = scalar
         this.y = scalar
@@ -26,6 +32,12 @@ export class Vector {
         this.x *= scalar
         this.y *= scalar
         this.z *= scalar
+        return this
+    }
+    multiply(v) {
+        this.x *= v.x
+        this.y *= v.y
+        this.z *= v.z
         return this
     }
     divideScalar(scalar) {

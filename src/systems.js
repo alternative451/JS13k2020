@@ -321,14 +321,53 @@ export const collide = (ecs) => {
                     const wall = entityWall.get(Wall)
                     const fPos = pos.clone()
                     // -->|
-                    if (speed.x > 0 &&
+                    if (
                         pos.x + box.xMax > wall.x  
-                        && pos.x + box.xMax < wall.x + 1 
-                        && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) || 
-                        (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
-                        fPos.x = (box.xMin + wall.x) + (box.xMin + wall.x - fPos.x)
-                        speed.x = -speed.x
+                        && pos.x + box.xMax < wall.x + 1) {
+                        if (pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) {
+                            // bottom point collide
+                            const passed = new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y)
+                            if(speed.angle() - new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y).angle() > 0) {
+                                // by top
+                                const fspeed = speed.clone()
+                                fspeed.normalise().multiplyScalar(speed.y - passed.y)
+                                pos.add(fspeed)
+                                speed.x = -speed.x
+                                //console.log(passed.y)
+                            } else {
+                                // by left
+                                return 
+                                const fspeed = speed.clone()
+                                fspeed.normalise().multiplyScalar(speed.x - passed.x)
+                                pos.add(fspeed)
+                              //  speed.multiplyScalar(-1)
+                            }
+
+                        } else if(pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1) {
+                            return
+                            // top point collide
+                            const passed = new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y)
+                            if (speed.angle() - new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y).angle() > 0) {
+                                // by bottom
+                                const fspeed = speed.clone()
+                                fspeed.normalise().multiplyScalar(speed.y - passed.y)
+                                pos.add(fspeed)
+                                speed.multiplyScalar(-1)
+                                console.log(passed.y)
+                            } else {
+                                // by right
+                                const fspeed = speed.clone()
+                                fspeed.normalise().multiplyScalar(speed.x - passed.x)
+                                pos.add(fspeed)
+                                speed.multiplyScalar(-1)
+                            }
+                            
+                            
+                            // fPos.x = (box.xMin + wall.x) + (box.xMin + wall.x - fPos.x)
+                            // speed.x = -speed.x
+                        }
                     }
+                    return
                     //  |<--
                     if (speed.x < 0 &&
                         pos.x + box.xMin > wall.x 
