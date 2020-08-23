@@ -24,7 +24,7 @@ ecs.register(Pos, Speed, Acc, Controlable, TrialState, Shape, Bomb, Player, Host
   Collidable, Dead, BombBag, PreBlast, Blast)
 
 ecs.process(draw(ecs, ctx, tileSize), control(ecs), trialDisplay(ecs, ctx), 
-  liveBombs(ecs, ctx, tileSize), liveSpawn(ecs), ia(ecs), liveUi(ecs, ctx), collide(ecs), liveBombBag(ecs,ctx, cv), 
+  liveBombs(ecs, ctx, tileSize), liveSpawn(ecs), ia(ecs), liveUi(ecs, ctx), collide(ecs, ctx), liveBombBag(ecs,ctx, cv), 
   liveDead(ecs, ctx, tileSize), livePreBlast(ecs, ctx, tileSize, cv), liveBlast(ecs, ctx, tileSize))
 
 /* sync () => {

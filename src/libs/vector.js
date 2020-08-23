@@ -20,7 +20,7 @@ export class Vector {
        return this.x * v.x + this.y * v.y
     }
     angle() {
-        return Math.atan2(this.y, this.x)
+        return Math.atan2(this.x, this.y)
     }
     setScalar(scalar) {
         this.x = scalar

@@ -49,7 +49,7 @@ export const control = (ecs) => {
                     speed.setX(clamp(-PLAYER_BASE_FRICTION + speed.x, 0, Number.MAX_VALUE))
                 }
                 speed.add(acc).clampScalar(-PLAYER_SPEED, PLAYER_SPEED)
-                pos.add(speed)
+                
                 if (!isMain && !bombAvailable) {
                     bombAvailable = true
                 }
@@ -290,10 +290,10 @@ export const liveUi = (ecs, ctx) => {
     }
 }
 
-export const collide = (ecs) => {
+export const collide = (ecs, ctx) => {
     const selectedCollidable = ecs.select(Collidable, Speed, Pos)
     const selectedWalls = ecs.select(Wall)
-    
+    let collided = false
     return {
         update: () => {
             selectedCollidable.iterate((entityCollidable) => {
@@ -316,91 +316,96 @@ export const collide = (ecs) => {
                     pos.y = Y_TILE_COUNT - 1 + box.yMax
                     speed.y = -speed.y
                 }
+                collided = false
                 selectedWalls.iterate((entityWall) => {
                     //AABB 
                     const wall = entityWall.get(Wall)
                     const fPos = pos.clone()
-                    // -->|
+                    fPos.add(speed)
+                    
                     if (
-                        pos.x + box.xMax > wall.x  
-                        && pos.x + box.xMax < wall.x + 1) {
-                        if (pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) {
-                            // bottom point collide
-                            const passed = new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y)
-                            if(speed.angle() - new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y).angle() > 0) {
-                                // by top
-                                const fspeed = speed.clone()
-                                fspeed.normalise().multiplyScalar(speed.y - passed.y)
-                                pos.add(fspeed)
+                        fPos.x + box.xMax > wall.x  
+                        && fPos.x + box.xMax < wall.x + 1) {
+                        if (fPos.y + box.yMax > wall.y && fPos.y + box.yMax < wall.y + 1) {
+                            // bottom right point collide
+                            if(speed.angle() < new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y).angle()) {
+                                // by top of the wall
+                                pos.y = wall.y + box.yMin
+                                pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
+                                speed.y = -speed.y
+                                collided = true
+                            } else {
+                              // by right of the wall
+                                pos.x = wall.x + box.xMin
+                                pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
                                 speed.x = -speed.x
-                                //console.log(passed.y)
-                            } else {
-                                // by left
-                                return 
-                                const fspeed = speed.clone()
-                                fspeed.normalise().multiplyScalar(speed.x - passed.x)
-                                pos.add(fspeed)
-                              //  speed.multiplyScalar(-1)
+                                collided = true
                             }
-
-                        } else if(pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1) {
-                            return
-                            // top point collide
-                            const passed = new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y)
-                            if (speed.angle() - new Vector((pos.x + box.xMax) - wall.x, (pos.y + box.yMax) - wall.y).angle() > 0) {
-                                // by bottom
-                                const fspeed = speed.clone()
-                                fspeed.normalise().multiplyScalar(speed.y - passed.y)
-                                pos.add(fspeed)
-                                speed.multiplyScalar(-1)
-                                console.log(passed.y)
+                        } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
+                            // top right point collide
+                            if(speed.angle() < new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMin) - (wall.y + 1)).angle()) {
+                               // with vertical wall
+                                pos.x = wall.x + box.xMin
+                                pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
+                                speed.x = -speed.x
+                                collided = true
                             } else {
-                                // by right
-                                const fspeed = speed.clone()
-                                fspeed.normalise().multiplyScalar(speed.x - passed.x)
-                                pos.add(fspeed)
-                                speed.multiplyScalar(-1)
+                                // by bottom of the wall
+                                pos.y = wall.y + 1 + box.xMax
+                                pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
+                                speed.y = -speed.y
+                                collided = true
                             }
-                            
-                            
-                            // fPos.x = (box.xMin + wall.x) + (box.xMin + wall.x - fPos.x)
-                            // speed.x = -speed.x
                         }
-                    }
-                    return
-                    //  |<--
-                    if (speed.x < 0 &&
-                        pos.x + box.xMin > wall.x 
-                        && pos.x + box.xMin < wall.x + 1
-                        && ((pos.y + box.yMax > wall.y && pos.y + box.yMax < wall.y + 1) ||
-                            (pos.y + box.yMin > wall.y && pos.y + box.yMin < wall.y + 1))) {
-                        console.log((box.xMax + wall.x + 1 - fPos.x) )
-
-                        fPos.x = (box.xMax + wall.x + 1) + (box.xMax + wall.x + 1 - fPos.x) 
-                            speed.x = -speed.x
-                    }
-                    // __
-                    // /\
-                    if(speed.y < 0 &&
-                        pos.y + box.yMin > wall.y
-                        && pos.y + box.yMin < wall.y + 1
-                        && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) || 
-                        (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
-                        fPos.y = (box.xMax + wall.y + 1) + (box.xMax + wall.y + 1 - fPos.y)
-                            speed.y = -speed.y
+                    } else if (fPos.x + box.xMin > wall.x  
+                        && fPos.x + box.xMin < (wall.x + 1)) {
+                            if (fPos.y + box.yMax > wall.y && fPos.y + box.yMax < wall.y + 1) {
+                                // bottom left point collide
+                                if(speed.angle() < new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMax) - wall.y).angle()) {
+                                    // vertical wall
+                                    pos.x = wall.x + 1 + box.xMax
+                                    pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
+                                    speed.x = -speed.x
+                                    collided = true
+                                } else {
+                                    // hozizontal wall
+                                    pos.y = wall.y + box.yMin
+                                    pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
+                                    speed.y = -speed.y
+                                    collided = true
+                                }
+                            } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
+                                // top left point collide
+                                ctx.beginPath()
+                                const a  = new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMin) - (wall.y + 1))
+                                ctx.strokeStyle = "red"
+                                ctx.moveTo(400, 400)
+                                console.log(speed.angle(), a.angle())
+                                ctx.lineTo(400 +  speed.x * 200, 400 + speed.y * 200)
+                                ctx.stroke()
+                                ctx.closePath()
+                                if(-speed.angle() > new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMin) - (wall.y + 1)).angle()) { 
+                                    console.log("vert")
+                                    // vertical wall
+                                    pos.x = wall.x + 1 + box.xMax
+                                    pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
+                                    speed.x = -speed.x
+                                    collided = true
+                                } else {
+                                    console.log("hoz")
+                                    // hozizontal wall
+                                    pos.y = wall.y + 1 + box.xMax
+                                    pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
+                                    speed.y = -speed.y
+                                    collided = true
+                                }
+                            }
                         }
-                    //  v
-                    // ---
-                    if(speed.y > 0 &&
-                        pos.y + box.xMax > wall.y 
-                        && pos.y + box.xMax < wall.y + 1
-                        && ((pos.x + box.xMin > wall.x && pos.x + box.xMin < wall.x + 1) ||
-                            (pos.x + box.xMax > wall.x && pos.x + box.xMax < wall.x + 1))) {
-                        fPos.y = (box.xMin + wall.y) + (box.xMin + wall.y - fPos.y)
-                        speed.y = -speed.y
-                    }
-                    pos.set(fPos)
+        
                 })
+                if(!collided) {
+                    pos.add(speed)
+                }
             })
         }
     }
