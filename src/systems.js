@@ -328,32 +328,43 @@ export const collide = (ecs, ctx) => {
                         && fPos.x + box.xMax < wall.x + 1) {
                         if (fPos.y + box.yMax > wall.y && fPos.y + box.yMax < wall.y + 1) {
                             // bottom right point collide
-                            if(speed.angle() < new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y).angle()) {
-                                // by top of the wall
+const aaa = new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y)
+                                ctx.beginPath()
+                                ctx.moveTo(400,400)
+                                ctx.lineTo(400 + aaa.x * 200, 400 + aaa.y * 200)
+                                ctx.strokeStyle = "red"
+                                ctx.stroke()
+                                ctx.closePath()
+                                console.log(speed.angle())
+                            if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y).angle() && speed.y > 0) {
+
+                                // with vertical wall
                                 pos.y = wall.y + box.yMin
                                 pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
                                 speed.y = -speed.y
                                 collided = true
                             } else {
-                              // by right of the wall
+                                // by horizontal wall
                                 pos.x = wall.x + box.xMin
                                 pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
                                 speed.x = -speed.x
                                 collided = true
                             }
                         } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
+                            console.log("top right")
                             // top right point collide
-                            if(speed.angle() < new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMin) - (wall.y + 1)).angle()) {
-                               // with vertical wall
-                                pos.x = wall.x + box.xMin
-                                pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
-                                speed.x = -speed.x
-                                collided = true
-                            } else {
-                                // by bottom of the wall
+                            if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - (wall.y + 1)).angle()) {
+                                // with horiztona wall
                                 pos.y = wall.y + 1 + box.xMax
                                 pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
                                 speed.y = -speed.y
+                                collided = true
+                            } else {
+                                console.log("v")
+                                // with vertical wall
+                                pos.x = wall.x + box.xMin
+                                pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
+                                speed.x = -speed.x
                                 collided = true
                             }
                         }
@@ -361,7 +372,7 @@ export const collide = (ecs, ctx) => {
                         && fPos.x + box.xMin < (wall.x + 1)) {
                             if (fPos.y + box.yMax > wall.y && fPos.y + box.yMax < wall.y + 1) {
                                 // bottom left point collide
-                                if(speed.angle() < new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMax) - wall.y).angle()) {
+                                if(speed.angle() > new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMax) - wall.y).angle()) {
                                     // vertical wall
                                     pos.x = wall.x + 1 + box.xMax
                                     pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
@@ -376,16 +387,7 @@ export const collide = (ecs, ctx) => {
                                 }
                             } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
                                 // top left point collide
-                                ctx.beginPath()
-                                const a  = new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMin) - (wall.y + 1))
-                                ctx.strokeStyle = "red"
-                                ctx.moveTo(400, 400)
-                                console.log(speed.angle(), a.angle())
-                                ctx.lineTo(400 +  speed.x * 200, 400 + speed.y * 200)
-                                ctx.stroke()
-                                ctx.closePath()
-                                if(-speed.angle() > new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMin) - (wall.y + 1)).angle()) { 
-                                    console.log("vert")
+                                if(speed.angle() < new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMin) - (wall.y + 1)).angle()) { 
                                     // vertical wall
                                     pos.x = wall.x + 1 + box.xMax
                                     pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
