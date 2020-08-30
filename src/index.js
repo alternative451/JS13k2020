@@ -33,7 +33,7 @@ ecs.register(Pos, Speed, Acc, Controlable, TrialState, Shape, Bomb, Player, Host
 
 
 ecs.process(trialDisplay(ecs, ctx), draw(ecs, ctx), control(ecs), 
-  liveBombs(ecs, ctx), liveSpawn(ecs), ia(ecs), liveUi(ecs, ctx), liveHp(ecs, ctx, tileSize), liveDoors(ecs, ctx), collide(ecs, ctx), liveBombBag(ecs, ctx, tileSize), 
+  liveBombs(ecs, ctx), liveSpawn(ecs, ctx), ia(ecs), liveUi(ecs, ctx), liveHp(ecs, ctx), liveDoors(ecs, ctx), collide(ecs, ctx), liveBombBag(ecs, ctx, tileSize), 
   liveDead(ecs, ctx), livePreBlast(ecs, ctx, cv), liveBlast(ecs, ctx))
 
 /* sync () => {

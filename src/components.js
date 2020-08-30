@@ -1,5 +1,5 @@
 import { Vector } from "./libs/vector"
-import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES, PLAYER_HEIGHT } from "./config"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES, PLAYER_HEIGHT, SPAWNER_CD } from "./config"
 import { pi2 } from "./libs/utils"
 
 export class Pos extends Vector {}
@@ -8,16 +8,40 @@ export class Acc extends Vector {}
 
 export class Spawn {
     constructor(ecs, max, total) {
-        this.cd = 3000
+        this.cd = SPAWNER_CD
         this.maxHostiles = max
         this.total = total
+        this.hostiles = []
         for(let i = 0; i < this.maxHostiles; i ++) {
-            ecs.create()
-                .add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
+            let entity = ecs.create()
+            this.hostiles.push(entity)
+            entity.add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
         }
     }
-
-    
+    remaining() {
+        let remainingAlive = 0
+        for(let i = 0; i < this.hostiles.length; i ++) {
+            if(this.hostiles[i].get(Hostile).isActive) {
+                remainingAlive ++
+            }
+        }
+        return this.total + remainingAlive
+    }
+    hasOne() {
+        for(let i = 0; i < this.hostiles.length; i ++) {
+            if(this.hostiles[i].get(Hostile).isActive === false) {
+                return this.hostiles[i]
+            }
+        }
+        return false
+    }
+    active(pos) {
+        const hostile = this.hasOne()
+        if(hostile) {
+            hostile.get(Hostile).isActive = true
+            hostile.get(Pos).set(pos)
+        }
+    }
 }
 
 const Z = 90
@@ -200,6 +224,8 @@ export class BombBag {
         this.maxSize = maxSize 
         this.disabled = 0
         this.bombSlots = []
+        this.isRolling = false
+        this.rollAt = -1
         for(let i = 0; i < maxSize; i ++) {
             this.bombSlots.push(new BombSlot(cd))
         }
@@ -232,7 +258,13 @@ export class BombBag {
             }
         }
     }
+    initRoll() {
+        this.isRolling = true
+        this.rollTime = 0
+    }
     roll() {
+        this.isRolling = false
+
         for (let i = 0; i < this.bombSlots.length; i++) {
             if (!this.bombSlots[i].isDisabled) {
                 this.bombSlots[i].roll()

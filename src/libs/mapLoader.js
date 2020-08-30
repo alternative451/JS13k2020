@@ -1,7 +1,7 @@
 import arene from "../assets/maps/arene1.json"
 import tut from "../assets/maps/tut2.json"
 
-import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile } from "../components"
+import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb } from "../components"
 import { createPlayer } from "./utils"
 import { X_TILE_COUNT, Y_TILE_COUNT } from "../config"
 
@@ -76,11 +76,15 @@ const process = (map, ecs, cv) => {
 } 
 
 const cleanMap = (ecs) => {
-    const Entities = [Wall, Spawn, TrialState, Hostile]
+    const Entities = [Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb]
     Entities.forEach((entityName) => {
         ecs.select(entityName).iterate((entityEntity) => {
             entityEntity.eject()
         })
+    })
+    const bb = ecs.select(BombBag)
+    bb.iterate((bbEntity) => {
+        bbEntity.get(BombBag).roll()
     })
 }
 

@@ -1,8 +1,9 @@
 import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door } from "./components"
-import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE } from "./config"
+import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
+import { drawBombCard, drawBomb } from "./draw_helpers"
 
 export const control = (ecs) => {
     const selected = ecs.select(Pos, Controlable, Acc, Speed)
@@ -93,14 +94,18 @@ export const draw = (ecs, ctx) => {
                 ctx.fillStyle = ""
                 ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
+            ctx.fillRect(0,0,X_TILE_COUNT * tileSize, tileSize)
+            ctx.fillRect(0,Y_TILE_COUNT * tileSize, X_TILE_COUNT * tileSize, tileSize)
+            ctx.fillRect(0, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
+            ctx.fillRect((X_TILE_COUNT - 1) * tileSize, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
+
         }
     }
 }
 
 
-export const liveSpawn = (ecs) => {
+export const liveSpawn = (ecs, ctx) => {
     const selector = ecs.select(Spawn)
-    const hostileSelector = ecs.select(Hostile)
 
     return {
         update: (dt) => {
@@ -108,23 +113,24 @@ export const liveSpawn = (ecs) => {
                 const pos = entity.get(Pos)
                 const spawner = entity.get(Spawn)
                 spawner.cd -= dt
-                console.log(spawner.maxHostiles)
+                if(spawner.cd <= 0 && spawner.total > 0 && spawner.hasOne()) {
+                    spawner.cd = SPAWNER_CD
+                    spawner.active(pos)
+                    spawner.total --
+                } else if(spawner.cd > 0 && spawner.total > 0) {
+                    // spawning load
+                    ctx.beginPath()
+                    ctx.arc(pos.x * tileSize, pos.y * tileSize, spawner.cd / SPAWNER_CD * 20 + 10, 0, pi2)
+                    ctx.closePath()
+                    ctx.fillStyle = "rgba(255, 255, 255, .3)"
+                    ctx.fill()
+                }
 
-                if(spawner.cd < 0 && spawner.total > 0) {
-                    spawner.cd = 3000
-                    let oneCreated = false
-                    hostileSelector.iterate((hostileEntity) => {
-                        const hostile = hostileEntity.get(Hostile)
-                        if (!hostile.isActive && !oneCreated) {
-                            hostile.isActive = true
-                            const hpos = hostileEntity.get(Pos)
-                            hpos.set(pos)
-                            oneCreated = true
-                            spawner.total --
-                        }
-                    })
-
-                } 
+                ctx.beginPath()
+                ctx.arc(pos.x * tileSize, pos.y * tileSize, 10, 0, pi2)
+                ctx.closePath()
+                ctx.fillStyle = spawner.total > 0 ? "rgba(255, 255, 255, .3)" : "rgba(0, 0, 0, .3)"
+                ctx.fill()
             }) 
         }
     }
@@ -232,14 +238,8 @@ export const liveBombs = (ecs, ctx) => {
                 const bomb = entity.get(Bomb)
                 const pos = entity.get(Pos)
                 bomb.timer -= dt
-                const x = pos.x * tileSize
-                const y = pos.y * tileSize
-                ctx.beginPath()
-                ctx.arc(x, y, bomb.radius * tileSize, 0, pi2)
-                ctx.closePath()
-                ctx.stroke()
-                ctx.fillText(Math.ceil(bomb.timer / 1000), x, y - 20)
-
+      
+                drawBomb(bomb, pos.clone().multiplyScalar(tileSize), ctx)
                 if(bomb.timer < 0) {
                     entity.eject()
                     hostileSelected.iterate((hostileEntity) => {
@@ -254,7 +254,6 @@ export const liveBombs = (ecs, ctx) => {
                             .add(
                                 new Dead(performance.now()), 
                                 new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
-                                
                             )
                         }
                     })
@@ -308,16 +307,16 @@ export const collide = (ecs, ctx) => {
                     return
                 }
                 const box = entityCollidable.get(Collidable)
-                if (pos.x + box.xMin < 0) {
-                    pos.x = -box.xMin
+                if (pos.x + box.xMin < 1) {
+                    pos.x = -box.xMin + 1
                     speed.x = -speed.x
                 }
-                if (pos.y + box.yMin < 0) {
-                    pos.y = -box.yMin
+                if (pos.y + box.yMin < 1) {
+                    pos.y = -box.yMin + 1
                     speed.y = -speed.y
                 }
-                if (pos.x - box.xMax > X_TILE_COUNT - 1 ) {
-                    pos.x = X_TILE_COUNT - 1 + box.xMax
+                if (pos.x - box.xMax > X_TILE_COUNT - 2 ) {
+                    pos.x = X_TILE_COUNT - 2 + box.xMax
                     speed.x = -speed.x
                 }
                 if (pos.y - box.yMax > Y_TILE_COUNT - 1 ) {
@@ -409,22 +408,25 @@ export const collide = (ecs, ctx) => {
 }
 
 export const liveBombBag = (ecs, ctx, tileSize) => {
-    const pos = new Vector(X_TILE_COUNT / 2 * tileSize - 300, Y_TILE_COUNT * tileSize + 100)
+    const pos = new Vector(X_TILE_COUNT / 2 * tileSize - 300, Y_TILE_COUNT * tileSize - 50)
     const bombBagSelector = ecs.select(BombBag)
     return {
-        update() {
+        update(dt) {
             bombBagSelector.iterate((bombBagEntity) => {
                 const bombBag = bombBagEntity.get(BombBag)
+                bombBag.rollTime += dt
+                
+                if(bombBag.rollTime > BOMBAG_ROLL_DURATION && bombBag.isRolling) {
+                    bombBag.roll()
+                }
+
                 for(let i = 1; i <= bombBag.bombSlots.length; i ++) {
                     let bombSlot = bombBag.bombSlots[i-1]
-                    ctx.fillStyle = bombSlot.isDisabled ? "rgba(200, 30, 30, .5)" : "rgba(30, 130, 30, .5)"
-                    ctx.fillRect(pos.x + i * 105, pos.y, 100, 100)
-                    ctx.fillStyle = "#000"
-                    ctx.fillText(bombSlot.isAvailable, pos.x + i * 105, pos.y)
-                    ctx.fillText(bombSlot.type, pos.x + i * 105, pos.y)
+                    drawBombCard(pos, bombSlot, i, ctx, bombBag.isRolling, bombBag.rollTime / BOMBAG_ROLL_DURATION)
                 }
-                if (!bombBag.isAvailable() && bombBag.isAllExploded()) {
-                    bombBag.roll()
+
+                if (!bombBag.isAvailable() && bombBag.isAllExploded() && !bombBag.isRolling) {
+                    bombBag.initRoll()
                 }
             })
             
@@ -456,21 +458,28 @@ export const liveBlast = (ecs, ctx) => {
 export const liveDoors = (ecs, ctx) => {
     const doorSelector = ecs.select(Door, Pos)
     const playerSelector = ecs.select(Player, Pos)
+    const spawnerSelector = ecs.select(Spawn)
+    let remaining = -1
     return {
         update: () => {
+            remaining = -1
+            spawnerSelector.iterate((spawnerEntities) => {
+                remaining += spawnerEntities.get(Spawn).remaining()
+            })
             playerSelector.iterate((playerEntity) => {
+                
                 const playerPos = playerEntity.get(Pos)
                 doorSelector.iterate((doorEntity) => {
                     const pos = doorEntity.get(Pos)
-                    const door = doorEntity.get(Door)
-                    ctx.fillStyle = "#9e333d"
+                    const isOpen = remaining === 0 || remaining === -1
+                    ctx.fillStyle = isOpen ? "#31cd39" : "#9e333d"
                     switch(pos.x) { 
                         case 0://top
                             ctx.fillRect(5 * tileSize, 0 * tileSize, 4 * tileSize, tileSize); break
                         case 1: //right
-                            if(isPlayerOverlap(playerPos, new Vector(X_TILE_COUNT - 1, 3), new Vector(1, 4))) {
+                            if(isOpen && isPlayerOverlap(playerPos, new Vector(X_TILE_COUNT - 1, 3), new Vector(1, 4))) {
                                window.mapLoader.next()
-                               playerPos.x = 0
+                               playerPos.x = 1
                             }
                             ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 3 * tileSize, tileSize, 4 * tileSize); break
                         case 2: //bottom
@@ -485,9 +494,9 @@ export const liveDoors = (ecs, ctx) => {
     }
 }
 
-export const liveHp = (ecs, ctx, tileSize) => {
+export const liveHp = (ecs, ctx) => {
     const playerSelector = ecs.select(Player)
-    const uiPos = new Vector(X_TILE_COUNT / 2 * tileSize, 100)
+    const uiPos = new Vector((X_TILE_COUNT / 2 * tileSize) - 210, 20)
     return {
         update: () => {
             playerSelector.iterate((playerEntity) => {
