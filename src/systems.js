@@ -1,10 +1,11 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, Items, BombSac, BombBag, Dead, PreBlast, Blast } from "./components"
-import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS } from "./config"
-import { clamp, pi2 } from "./libs/utils"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door } from "./components"
+import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE } from "./config"
+import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
+import { dieScreen } from "./screens"
 
 export const control = (ecs) => {
-    const selected = ecs.select(Pos, Controlable)
+    const selected = ecs.select(Pos, Controlable, Acc, Speed)
     const trials = ecs.select(TrialState, Controlable)
     const bombBagSelector = ecs.select(BombBag)
     let bombAvailable = true
@@ -76,7 +77,7 @@ export const control = (ecs) => {
     }
 }
 
-export const draw = (ecs, ctx, tileSize) => {
+export const draw = (ecs, ctx) => {
     const selectedShape = ecs.select(Pos, Shape)
     const selectedWalls = ecs.select(Wall)
     return {
@@ -89,6 +90,7 @@ export const draw = (ecs, ctx, tileSize) => {
 
             selectedWalls.iterate((entityWall) => {
                 const wall = entityWall.get(Wall)
+                ctx.fillStyle = ""
                 ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
         }
@@ -106,7 +108,9 @@ export const liveSpawn = (ecs) => {
                 const pos = entity.get(Pos)
                 const spawner = entity.get(Spawn)
                 spawner.cd -= dt
-                if(spawner.cd < 0) {
+                console.log(spawner.maxHostiles)
+
+                if(spawner.cd < 0 && spawner.total > 0) {
                     spawner.cd = 3000
                     let oneCreated = false
                     hostileSelector.iterate((hostileEntity) => {
@@ -116,7 +120,7 @@ export const liveSpawn = (ecs) => {
                             const hpos = hostileEntity.get(Pos)
                             hpos.set(pos)
                             oneCreated = true
-
+                            spawner.total --
                         }
                     })
 
@@ -144,7 +148,8 @@ export const ia = (ecs) => {
                             const d = playerPos.clone()
                             const b = d.sub(hostilePos)
                             hostileSpeed.set(b.normalise().multiplyScalar(HOSTILE_SPEED))
-                            hostilePos.add(hostileSpeed)
+                        } else {
+                            hostileSpeed.setScalar(0)
                         }
                         
 
@@ -164,7 +169,7 @@ export const ia = (ecs) => {
     }
 }
 
-export const livePreBlast = (ecs, ctx, tileSize, cv) => {
+export const livePreBlast = (ecs, ctx, cv) => {
     const selected = ecs.select(PreBlast)
     const selectedPlayer = ecs.select(Player)
     const bombBagSelector = ecs.select(BombBag)
@@ -182,10 +187,9 @@ export const livePreBlast = (ecs, ctx, tileSize, cv) => {
                 if (performance.now() - preblast.at > PRE_BLAST_DURATION ) {
                     selectedPlayer.iterate((playerEntity) => {
                         const playerPos = playerEntity.get(Pos)
+                        const player = playerEntity.get(Player)
                         if (pos.distance2D(playerPos) < BLAST_RADIUS) {
-                            bombBagSelector.iterate((bombBagEntity) => {
-                                bombBagEntity.get(BombBag).disable(ecs, cv)
-                            })
+                            player.hp -= HOSTILE_BOMB_DAMAGE
                         }
                     })
 
@@ -204,23 +208,22 @@ export const livePreBlast = (ecs, ctx, tileSize, cv) => {
 }
 
 export const trialDisplay = (ecs, ctx) => {
-    const selected = ecs.select(TrialState)
+    const selected = ecs.select(TrialState, Pos)
     return {
         update : (dt) => {
             selected.iterate((entity) => {
-                if(!entity.get(TrialState).isUpPressed && !entity.get(TrialState).isUpPressed) {
-                    ctx.fillText("Press Up", 10, 50)
-                } else if(entity.get(TrialState).isDownPressed&&entity.get(TrialState).isUpPressed) {
-                    ctx.fillText("Good Dog !", 10, 50)
-                } else if(entity.get(TrialState).isUpPressed) {
-                    ctx.fillText("Press DOWN", 10, 50)
-                }
+                const trialState = entity.get(TrialState)
+                const pos = entity.get(Pos)
+                ctx.textAlign = "center"
+                ctx.font = "50px sans-serif"
+                ctx.fillStyle = "rgba(100, 170, 220)"
+                ctx.fillText(trialState.sc, pos.x * tileSize, pos.y * tileSize)
             })
         }
     }
 }
 
-export const liveBombs = (ecs, ctx, tileSize) => {
+export const liveBombs = (ecs, ctx) => {
     const selected = ecs.select(Bomb)
     const hostileSelected = ecs.select(Hostile, Pos)
     return {
@@ -241,9 +244,11 @@ export const liveBombs = (ecs, ctx, tileSize) => {
                     entity.eject()
                     hostileSelected.iterate((hostileEntity) => {
                         const hostilePos = hostileEntity.get(Pos)
+                        const hostileSpeed = hostileEntity.get(Speed)
                         const hostile = hostileEntity.get(Hostile)
                         if (hostilePos.distance2D(pos) < bomb.radius) {
                             hostile.isActive = false
+                            hostileSpeed.setScalar(0)
 
                             ecs.create()
                             .add(
@@ -260,7 +265,7 @@ export const liveBombs = (ecs, ctx, tileSize) => {
     }
 }
 
-export const liveDead = (ecs, ctx, tileSize) => {
+export const liveDead = (ecs, ctx) => {
     const deadSelector = ecs.select(Dead, Pos)
     return {
         update: () => {
@@ -299,6 +304,9 @@ export const collide = (ecs, ctx) => {
             selectedCollidable.iterate((entityCollidable) => {
                 const pos = entityCollidable.get(Pos)
                 const speed = entityCollidable.get(Speed)
+                if(speed.x === 0 && speed.y === 0) {
+                    return
+                }
                 const box = entityCollidable.get(Collidable)
                 if (pos.x + box.xMin < 0) {
                     pos.x = -box.xMin
@@ -322,22 +330,12 @@ export const collide = (ecs, ctx) => {
                     const wall = entityWall.get(Wall)
                     const fPos = pos.clone()
                     fPos.add(speed)
-                    
                     if (
                         fPos.x + box.xMax > wall.x  
                         && fPos.x + box.xMax < wall.x + 1) {
                         if (fPos.y + box.yMax > wall.y && fPos.y + box.yMax < wall.y + 1) {
                             // bottom right point collide
-const aaa = new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y)
-                                ctx.beginPath()
-                                ctx.moveTo(400,400)
-                                ctx.lineTo(400 + aaa.x * 200, 400 + aaa.y * 200)
-                                ctx.strokeStyle = "red"
-                                ctx.stroke()
-                                ctx.closePath()
-                                console.log(speed.angle())
                             if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y).angle() && speed.y > 0) {
-
                                 // with vertical wall
                                 pos.y = wall.y + box.yMin
                                 pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
@@ -351,7 +349,6 @@ const aaa = new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.
                                 collided = true
                             }
                         } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
-                            console.log("top right")
                             // top right point collide
                             if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - (wall.y + 1)).angle()) {
                                 // with horiztona wall
@@ -360,7 +357,6 @@ const aaa = new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.
                                 speed.y = -speed.y
                                 collided = true
                             } else {
-                                console.log("v")
                                 // with vertical wall
                                 pos.x = wall.x + box.xMin
                                 pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
@@ -394,7 +390,6 @@ const aaa = new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.
                                     speed.x = -speed.x
                                     collided = true
                                 } else {
-                                    console.log("hoz")
                                     // hozizontal wall
                                     pos.y = wall.y + 1 + box.xMax
                                     pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
@@ -413,7 +408,8 @@ const aaa = new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.
     }
 }
 
-export const liveBombBag = (ecs, ctx, cv) => {
+export const liveBombBag = (ecs, ctx, tileSize) => {
+    const pos = new Vector(X_TILE_COUNT / 2 * tileSize - 300, Y_TILE_COUNT * tileSize + 100)
     const bombBagSelector = ecs.select(BombBag)
     return {
         update() {
@@ -422,10 +418,10 @@ export const liveBombBag = (ecs, ctx, cv) => {
                 for(let i = 1; i <= bombBag.bombSlots.length; i ++) {
                     let bombSlot = bombBag.bombSlots[i-1]
                     ctx.fillStyle = bombSlot.isDisabled ? "rgba(200, 30, 30, .5)" : "rgba(30, 130, 30, .5)"
-                    ctx.fillRect(cv.width - i * 105, cv.height - 100, 100, 100)
+                    ctx.fillRect(pos.x + i * 105, pos.y, 100, 100)
                     ctx.fillStyle = "#000"
-                    ctx.fillText(bombSlot.isAvailable, cv.width - i * 105, cv.height - 100)
-                    ctx.fillText(bombSlot.type, cv.width - i * 105, cv.height - 110)
+                    ctx.fillText(bombSlot.isAvailable, pos.x + i * 105, pos.y)
+                    ctx.fillText(bombSlot.type, pos.x + i * 105, pos.y)
                 }
                 if (!bombBag.isAvailable() && bombBag.isAllExploded()) {
                     bombBag.roll()
@@ -436,7 +432,7 @@ export const liveBombBag = (ecs, ctx, cv) => {
     }
 }
 
-export const liveBlast = (ecs, ctx, tileSize) => {
+export const liveBlast = (ecs, ctx) => {
     const selector = ecs.select(Blast)
     return {
         update : (dt) => {  
@@ -452,6 +448,59 @@ export const liveBlast = (ecs, ctx, tileSize) => {
                 ctx.arc(pos.x * tileSize, pos.y * tileSize, BLAST_RADIUS * tileSize, 0, pi2)
                 ctx.closePath()
                 ctx.fill()
+            })
+        }
+    }
+}
+
+export const liveDoors = (ecs, ctx) => {
+    const doorSelector = ecs.select(Door, Pos)
+    const playerSelector = ecs.select(Player, Pos)
+    return {
+        update: () => {
+            playerSelector.iterate((playerEntity) => {
+                const playerPos = playerEntity.get(Pos)
+                doorSelector.iterate((doorEntity) => {
+                    const pos = doorEntity.get(Pos)
+                    const door = doorEntity.get(Door)
+                    ctx.fillStyle = "#9e333d"
+                    switch(pos.x) { 
+                        case 0://top
+                            ctx.fillRect(5 * tileSize, 0 * tileSize, 4 * tileSize, tileSize); break
+                        case 1: //right
+                            if(isPlayerOverlap(playerPos, new Vector(X_TILE_COUNT - 1, 3), new Vector(1, 4))) {
+                               window.mapLoader.next()
+                               playerPos.x = 0
+                            }
+                            ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 3 * tileSize, tileSize, 4 * tileSize); break
+                        case 2: //bottom
+                            ctx.fillRect(5 * tileSize, (Y_TILE_COUNT - 1) * tileSize, 4 * tileSize, tileSize); break
+                        case 3: //left
+                            ctx.fillRect(0 * tileSize, 3 * tileSize, tileSize, 4 * tileSize); break
+                    }
+                    
+                })
+            })
+        }
+    }
+}
+
+export const liveHp = (ecs, ctx, tileSize) => {
+    const playerSelector = ecs.select(Player)
+    const uiPos = new Vector(X_TILE_COUNT / 2 * tileSize, 100)
+    return {
+        update: () => {
+            playerSelector.iterate((playerEntity) => {
+                const playerComponent = playerEntity.get(Player)
+                if(playerComponent.hp <= 0) {
+                    mapLoader.unload(ecs)
+                    window.currentScreen = dieScreen(ecs, tileSize)
+                } else {
+                    ctx.fillStyle = "#000"
+                    ctx.fillRect(uiPos.x, uiPos.y, 420, 50)
+                    ctx.fillStyle = "red"
+                    ctx.fillRect(uiPos.x + 10, uiPos.y + 10, playerComponent.hp * 4, 30)
+                }
             })
         }
     }

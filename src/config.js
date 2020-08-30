@@ -10,6 +10,7 @@ export const PLAYER_HEIGHT = 1
 
 export const HOSTILE_WIDTH = .5
 export const HOSTILE_SPEED = .1
+export const HOSTILE_BOMB_DAMAGE = 15
 
 export const DEAD_LIVE = 3000
 
@@ -45,3 +46,5 @@ export const BOMB_PROPERTIES = [
         timer: 3000,
     }
 ]
+
+export const LOADING_DURATION = 1000
