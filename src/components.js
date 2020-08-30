@@ -1,16 +1,16 @@
 import { Vector } from "./libs/vector"
 import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES, PLAYER_HEIGHT } from "./config"
 import { pi2 } from "./libs/utils"
-import { dieScreen } from "./screens"
 
 export class Pos extends Vector {}
 export class Speed extends Vector {}
 export class Acc extends Vector {}
 
 export class Spawn {
-    constructor(ecs) {
+    constructor(ecs, max, total) {
         this.cd = 3000
-        this.maxHostiles = 3
+        this.maxHostiles = max
+        this.total = total
         for(let i = 0; i < this.maxHostiles; i ++) {
             ecs.create()
                 .add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
@@ -74,9 +74,8 @@ export class Controlable {
 }
 
 export class TrialState {
-    constructor() {
-        this.isUpPressed = false
-        this.isDownPressed = false
+    constructor(sc) {
+        this.sc = sc
     }
 }
 
@@ -99,7 +98,7 @@ export const SMALL_CIRCLE = 2
 export class Shape {
     constructor(shape) {
         this.draw = (ctx, pos, tileSize) => {
-            ctx.fillStyle= "#134"
+            ctx.fillStyle= "rgba(13, 53, 72, .8)"
 
             if(shape === CIRCLE) {
                 ctx.beginPath()
@@ -142,7 +141,11 @@ export class PreBlast {
     }
 }
 
-export class Player {}
+export class Player {
+    constructor() {
+        this.hp = 100
+    }
+}
 
 export class UI {
     constructor(text, x, y, fn) {
@@ -239,7 +242,7 @@ export class BombBag {
     disable(ecs, cv) {
         this.disabled ++
         if(this.disabled === this.maxSize) {
-            window.currentScreen = dieScreen(ecs, cv)
+           
         }
         for(let i = 0; i < this.bombSlots.length; i ++) {
             if(!this.bombSlots[i].isDisabled) {
@@ -260,8 +263,17 @@ export class BombBag {
 }
 
 
+
 export class Blast {
     constructor(at) {
         this.at = at
     }
 }
+
+export class Door {
+    constructor(to) {
+        this.to = to
+        this.timer = -1
+    }
+}
+
