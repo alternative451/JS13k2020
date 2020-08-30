@@ -13,8 +13,8 @@ export const BOMBAG_ROLL_DURATION = 2000
 export const HOSTILE_WIDTH = .5
 export const HOSTILE_SPEED = .1
 export const HOSTILE_BOMB_DAMAGE = 15
-
 export const SPAWNER_CD = 1000
+
 
 export const DEAD_LIVE = 3000
 

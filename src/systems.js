@@ -409,6 +409,7 @@ export const collide = (ecs, ctx) => {
 
 export const liveBombBag = (ecs, ctx, tileSize) => {
     const pos = new Vector(X_TILE_COUNT / 2 * tileSize - 300, Y_TILE_COUNT * tileSize - 50)
+
     const bombBagSelector = ecs.select(BombBag)
     return {
         update(dt) {
@@ -473,6 +474,7 @@ export const liveDoors = (ecs, ctx) => {
                     const pos = doorEntity.get(Pos)
                     const isOpen = remaining === 0 || remaining === -1
                     ctx.fillStyle = isOpen ? "#31cd39" : "#9e333d"
+
                     switch(pos.x) { 
                         case 0://top
                             ctx.fillRect(5 * tileSize, 0 * tileSize, 4 * tileSize, tileSize); break
@@ -480,6 +482,7 @@ export const liveDoors = (ecs, ctx) => {
                             if(isOpen && isPlayerOverlap(playerPos, new Vector(X_TILE_COUNT - 1, 3), new Vector(1, 4))) {
                                window.mapLoader.next()
                                playerPos.x = 1
+
                             }
                             ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 3 * tileSize, tileSize, 4 * tileSize); break
                         case 2: //bottom
@@ -497,6 +500,7 @@ export const liveDoors = (ecs, ctx) => {
 export const liveHp = (ecs, ctx) => {
     const playerSelector = ecs.select(Player)
     const uiPos = new Vector((X_TILE_COUNT / 2 * tileSize) - 210, 20)
+
     return {
         update: () => {
             playerSelector.iterate((playerEntity) => {

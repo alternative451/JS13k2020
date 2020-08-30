@@ -12,6 +12,7 @@ export class Spawn {
         this.maxHostiles = max
         this.total = total
         this.hostiles = []
+
         for(let i = 0; i < this.maxHostiles; i ++) {
             let entity = ecs.create()
             this.hostiles.push(entity)

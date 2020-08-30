@@ -86,6 +86,7 @@ const cleanMap = (ecs) => {
     bb.iterate((bbEntity) => {
         bbEntity.get(BombBag).roll()
     })
+
 }
 
 export const mapLoader = (ecs) => {
