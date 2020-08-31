@@ -1,5 +1,14 @@
 # JS13k2020
 
+## Todo
+
+- convincing explosion
+- hostile / hostile collision
+- hostile ai
+- scalable ui
+- bomb dynamic 
+
+
 ## vrac
 
 - Preblast area
