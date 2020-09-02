@@ -1,9 +1,8 @@
-import arene from "../assets/maps/arene1.json"
-import tut from "../assets/maps/tut2.json"
+import welcome from "../assets/maps/welcome.json"
 
 import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb } from "../components"
 import { createPlayer } from "./utils"
-import { X_TILE_COUNT, Y_TILE_COUNT } from "../config"
+import { X_TILE_COUNT } from "../config"
 
 const process = (map, ecs, cv) => {
     const objects = map.layers[0].objects
@@ -90,7 +89,7 @@ const cleanMap = (ecs) => {
 }
 
 export const mapLoader = (ecs) => {
-    const maps = [arene, tut]
+    const maps = [welcome]
     let currentMap = -1
     
     return {

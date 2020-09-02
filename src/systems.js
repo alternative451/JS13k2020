@@ -1,5 +1,5 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door } from "./components"
-import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD } from "./config"
+import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion } from "./components"
+import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
@@ -237,10 +237,10 @@ export const liveBombs = (ecs, ctx) => {
             selected.iterate((entity) => {
                 const bomb = entity.get(Bomb)
                 const pos = entity.get(Pos)
-                bomb.timer -= dt
+                bomb.remaining -= dt
       
                 drawBomb(bomb, pos.clone().multiplyScalar(tileSize), ctx)
-                if(bomb.timer < 0) {
+                if(bomb.remaining < 0) {
                     entity.eject()
                     hostileSelected.iterate((hostileEntity) => {
                         const hostilePos = hostileEntity.get(Pos)
@@ -257,6 +257,12 @@ export const liveBombs = (ecs, ctx) => {
                             )
                         }
                     })
+                    ecs.create()
+                    .add(
+                        new Pos(pos.x, pos.y, pos.z),
+                        new Explosion()
+                        )
+
                 }
             })
             
@@ -513,6 +519,36 @@ export const liveHp = (ecs, ctx) => {
                     ctx.fillRect(uiPos.x, uiPos.y, 420, 50)
                     ctx.fillStyle = "red"
                     ctx.fillRect(uiPos.x + 10, uiPos.y + 10, playerComponent.hp * 4, 30)
+                    ctx.font='400 22px Arial';
+                    ctx.fillStyle = "#000"
+                    ctx.fillText("HP", uiPos.x + 17 , uiPos.y + 35)
+                    ctx.fillStyle = "#fff"
+                    ctx.fillText("HP", uiPos.x + 15, uiPos.y + 33)
+
+                }
+            })
+        }
+    }
+}
+
+export const liveExplosions = (ecs, ctx) => {
+    const explosionSelector = ecs.select(Explosion, Pos)
+    return {
+        update: (dt) => {
+            explosionSelector.iterate((explosionEntity) => {
+                const explosion = explosionEntity.get(Explosion)
+                explosion.remaining -= dt
+                ctx.fillStyle = `rgba(255,255,255,${ 1 - explosion.remaining / EXPLOSION_SFX_DURATION})`
+                if(explosion.remaining < 0) {
+                    explosionEntity.eject()
+                } else {
+                    const pos = explosionEntity.get(Pos)
+                    explosion.points.forEach(point => {
+                        ctx.beginPath()
+                        ctx.arc(point.x + pos.x * tileSize, point.y + pos.y * tileSize, EXPLOSION_SFX_SIZE * tileSize, 0, pi2)
+                        ctx.fill()
+                        point.multiplyScalar(1.33)
+                    });
                 }
             })
         }

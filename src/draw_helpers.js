@@ -81,10 +81,18 @@ export const drawBomb = (bomb, pos, ctx) => {
     ctx.beginPath()
     ctx.moveTo(pos.x, pos.y)
     ctx.lineTo(pos.x, pos.y - (bomb.radius * tileSize))
-    ctx.arc(pos.x, pos.y, bomb.radius * tileSize, -Math.PI / 2,  -Math.PI / 2 + (3000 - bomb.timer) / 3000 * pi2)
+    ctx.arc(pos.x, pos.y, bomb.radius * tileSize, -Math.PI / 2,  -Math.PI / 2 + (bomb.total - bomb.remaining) / bomb.total * pi2)
     ctx.lineTo(pos.x, pos.y)
     ctx.fill()
-    
-    //ctx.fillText(Math.ceil(bomb.timer / 1000), x, y - 20)
+}
+
+export const drawAgent = (pos, ctx, agent) => {
+    ctx.fillStyle = "#fff"
+    ctx.fillRect(pos.x * tileSize, pos.y * tileSize, agent.size * tileSize, agent.size * tileSize)
+    ctx.fillStyle = agent.color
+    ctx.fillRect(pos.x * tileSize + 2, pos.y * tileSize + 2, agent.size * tileSize - 4, agent.size * tileSize - 4)
+}
+
+export const drawEyes = (pos, ctx, eye) => {
 
 }

@@ -34,6 +34,14 @@ export class Vector {
         this.z *= scalar
         return this
     }
+
+    addScalar(scalar) {
+        this.x += scalar
+        this.y += scalar
+        this.z += scalar
+        return this
+    }
+
     multiply(v) {
         this.x *= v.x
         this.y *= v.y

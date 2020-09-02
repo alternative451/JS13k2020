@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="3">
+ <editorsettings>
+  <export target="../../../../../../Desktop/welcome.json" format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" source="../../../../../../Desktop/aos.tsx"/>
+ <objectgroup id="2" name="Calque d'Objets 1">
+  <object id="1" x="4.78233" y="6.00282">
+   <properties>
+    <property name="isStart" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" x="4.79173" y="1.94172" width="108" height="19">
+   <properties>
+    <property name="doors" type="int" value="2"/>
+   </properties>
+   <text fontfamily="MS Shell Dlg 2" pixelsize="3" wrap="1">Move with zqsd or wasd</text>
+  </object>
+ </objectgroup>
+ <layer id="1" name="Calque de Tuiles 1" width="22" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
+0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

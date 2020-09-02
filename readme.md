@@ -2,11 +2,11 @@
 
 ## Todo
 
+- bomb dynamic 
 - convincing explosion
 - hostile / hostile collision
 - hostile ai
 - scalable ui
-- bomb dynamic 
 
 
 ## vrac

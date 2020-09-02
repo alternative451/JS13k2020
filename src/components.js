@@ -1,5 +1,5 @@
 import { Vector } from "./libs/vector"
-import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, BOMB_PROPERTIES, PLAYER_HEIGHT, SPAWNER_CD } from "./config"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION } from "./config"
 import { pi2 } from "./libs/utils"
 
 export class Pos extends Vector {}
@@ -105,8 +105,10 @@ export class TrialState {
 }
 
 export class Bomb {
-    constructor(timer, radius) {
-        this.timer = timer
+    constructor(type, time, radius) {
+        this.type = type
+        this.remaining = time
+        this.total = time
         this.radius = radius
     }
 }
@@ -209,8 +211,7 @@ export class BombSlot {
         this.bomb = null
     }
     use() {
-        const properties = BOMB_PROPERTIES[this.type]
-        this.bomb = new Bomb(properties.timer, properties.radius)
+        this.bomb = new Bomb(this.type, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS)
         this.isAvailable = false
         return this.bomb
     }
@@ -310,3 +311,15 @@ export class Door {
     }
 }
 
+export class Explosion {
+    constructor() {
+        this.remaining = EXPLOSION_SFX_DURATION
+        this.points = []
+        for(let i = 0; i < EXPLOSION_SFX_COUNT; i++) {
+            const angle = Math.random() * pi2
+            this.points.push(new Vector(Math.cos(angle), Math.sin(angle)))
+        }
+    }
+}
+
+export class ExplosionParticle {}

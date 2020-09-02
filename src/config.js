@@ -8,6 +8,14 @@ export const PLAYER_BASE_FRICTION = .02
 export const PLAYER_WIDTH = 1
 export const PLAYER_HEIGHT = 1
 
+export const BOMB_PROPERTIES_RADIUS = 3 
+export const BOMB_PROPERTIES_TIMER = 2500
+
+export const EXPLOSION_SFX_DURATION = 300
+export const EXPLOSION_SFX_COUNT = 9
+export const EXPLOSION_SFX_SIZE = .5
+export const EXPLOSION_SFX_PROPAGATION = 1
+
 export const BOMBAG_ROLL_DURATION = 2000
 
 export const HOSTILE_WIDTH = .5
@@ -24,31 +32,6 @@ export const BLAST_DURATION = 300
 
 
 
-export const BOMB_PROPERTIES = [
-    {
-        radius: 1,
-        timer: 3000,
-    },
-    {
-        radius: 2,
-        timer: 3000,
-    },
-    {
-        radius: 3,
-        timer: 3000,
-    },
-    {
-        radius: 4,
-        timer: 3000,
-    },
-    {
-        radius: 5,
-        timer: 3000,
-    },
-    {
-        radius: 6,
-        timer: 3000,
-    }
-]
+
 
 export const LOADING_DURATION = 1000
