@@ -1,4 +1,12 @@
 { "compressionlevel":-1,
+ "editorsettings":
+    {
+     "export":
+        {
+         "format":"json",
+         "target":"welcome.json"
+        }
+    },
  "height":12,
  "infinite":false,
  "layers":[
@@ -24,6 +32,58 @@
                  "width":0,
                  "x":4.78233,
                  "y":6.00282
+                }, 
+                {
+                 "height":19,
+                 "id":2,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"doors",
+                         "type":"int",
+                         "value":2
+                        }],
+                 "rotation":0,
+                 "text":
+                    {
+                     "fontfamily":"MS Shell Dlg 2",
+                     "pixelsize":3,
+                     "text":"Move with zqsd or wasd",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":108,
+                 "x":4.79173,
+                 "y":1.94172
+                }, 
+                {
+                 "height":0,
+                 "id":3,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isSpawn",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"max",
+                         "type":"int",
+                         "value":2
+                        }, 
+                        {
+                         "name":"total",
+                         "type":"int",
+                         "value":11
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":15.111706133378,
+                 "y":7.05212952890972
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -44,7 +104,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":2,
+ "nextobjectid":4,
  "orientation":"orthogonal",
  "renderorder":"left-up",
  "tiledversion":"1.4.1",
@@ -52,7 +112,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"aos.tsx"
+         "source":"..\/..\/..\/..\/..\/..\/Desktop\/aos.tsx"
         }],
  "tilewidth":1,
  "type":"map",

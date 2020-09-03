@@ -1,5 +1,6 @@
 
 import { pi2 } from "./libs/utils"
+import { ATOMIC_BOMB_TYPE, FLASH_BOMB_TYPE, FREEZE_BOMB_TYPE, DETECT_BOMB_TYPE, TURTLE_BOMB_TYPE } from "./config"
 
 const dot = (ctx, x, y) => {
     ctx.beginPath()
@@ -62,7 +63,19 @@ export const drawBomb = (bomb, pos, ctx) => {
     ctx.arc(pos.x, pos.y, bomb.radius * tileSize, 0, pi2)
     ctx.closePath()
     ctx.lineWidth = 2
-    ctx.strokeStyle = "#ffbd18"
+    switch(bomb.type) {
+        case ATOMIC_BOMB_TYPE:
+            ctx.strokeStyle = "#ffbd18"; break
+        case FLASH_BOMB_TYPE:
+            ctx.strokeStyle = "#fff"; break
+        case FREEZE_BOMB_TYPE:
+            ctx.strokeStyle = "#00f"; break
+        case DETECT_BOMB_TYPE:
+            ctx.strokeStyle = "#f00"; break
+        case TURTLE_BOMB_TYPE:
+            ctx.strokeStyle = "#0f0"; break
+    }
+    
     ctx.stroke()
 
     

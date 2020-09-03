@@ -1,5 +1,5 @@
 import { Vector } from "./libs/vector"
-import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION } from "./config"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, DETECT_BOMB_TYPE, BOMB_PROPERTIES_MAX_TIMER, TURTLE_BOMB_TYPE } from "./config"
 import { pi2 } from "./libs/utils"
 
 export class Pos extends Vector {}
@@ -106,6 +106,8 @@ export class TrialState {
 
 export class Bomb {
     constructor(type, time, radius) {
+        this.triggered = false
+        this.armed = false
         this.type = type
         this.remaining = time
         this.total = time
@@ -158,6 +160,8 @@ export class Hostile {
         this.isActive = false
         this.type = type
         this.isAttacking = false
+        this.effect = null
+        this.effectTime = 0
     }
 }
 
@@ -211,12 +215,12 @@ export class BombSlot {
         this.bomb = null
     }
     use() {
-        this.bomb = new Bomb(this.type, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS)
+        this.bomb = new Bomb(this.type, this.type === DETECT_BOMB_TYPE ? BOMB_PROPERTIES_MAX_TIMER : BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS)
         this.isAvailable = false
         return this.bomb
     }
     roll() {
-        this.type = Math.floor(Math.random() * 6)
+        this.type = Math.floor(Math.random() * 5)
         this.isAvailable = true
     }
 }
@@ -312,9 +316,11 @@ export class Door {
 }
 
 export class Explosion {
-    constructor() {
+    constructor(bombType) {
         this.remaining = EXPLOSION_SFX_DURATION
         this.points = []
+        this.bombType = bombType
+
         for(let i = 0; i < EXPLOSION_SFX_COUNT; i++) {
             const angle = Math.random() * pi2
             this.points.push(new Vector(Math.cos(angle), Math.sin(angle)))

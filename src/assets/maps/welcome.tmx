@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="3">
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="4">
  <editorsettings>
-  <export target="../../../../../../Desktop/welcome.json" format="json"/>
+  <export target="welcome.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../../../../../../Desktop/aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
@@ -16,6 +16,14 @@
     <property name="doors" type="int" value="2"/>
    </properties>
    <text fontfamily="MS Shell Dlg 2" pixelsize="3" wrap="1">Move with zqsd or wasd</text>
+  </object>
+  <object id="3" x="15.1117" y="7.05213">
+   <properties>
+    <property name="isSpawn" type="bool" value="true"/>
+    <property name="max" type="int" value="2"/>
+    <property name="total" type="int" value="11"/>
+   </properties>
+   <point/>
   </object>
  </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">

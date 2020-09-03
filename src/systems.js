@@ -1,5 +1,5 @@
 import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion } from "./components"
-import { PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION } from "./config"
+import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
@@ -145,17 +145,25 @@ export const ia = (ecs) => {
                 const playerPos = playerEntity.get(Pos) 
                 hostileSelector.iterate((entity) => {
                     const hostile = entity.get(Hostile)
+                    if(hostile.effect) {
+                        hostile.effectTime -= dt
+                    }
+                    if(hostile.effectTime < 0 && hostile.effect) {
+                        hostile.effect = false
+                    }
                     if (hostile.isActive) {
                         const hostilePos = entity.get(Pos)
                         const hostileSpeed = entity.get(Speed)
 
                         // move toward player if no attacking
-                        if(!hostile.isAttacking) {
+                        if(hostile.isAttacking || hostile.effect === HOSTILE_EFFECT_FREEZE) {
+                            hostileSpeed.setScalar(0)
+                        } else if(hostile.effect === HOSTILE_EFFECT_DISORIENTED) {
+                            // do nothing; TODO may change direction
+                        } else {
                             const d = playerPos.clone()
                             const b = d.sub(hostilePos)
                             hostileSpeed.set(b.normalise().multiplyScalar(HOSTILE_SPEED))
-                        } else {
-                            hostileSpeed.setScalar(0)
                         }
                         
 
@@ -232,38 +240,87 @@ export const trialDisplay = (ecs, ctx) => {
 export const liveBombs = (ecs, ctx) => {
     const selected = ecs.select(Bomb)
     const hostileSelected = ecs.select(Hostile, Pos)
+    const playerSelected = ecs.select(Player)
     return {
         update: (dt) => {
             selected.iterate((entity) => {
                 const bomb = entity.get(Bomb)
                 const pos = entity.get(Pos)
                 bomb.remaining -= dt
-      
+                // atomic bomb
                 drawBomb(bomb, pos.clone().multiplyScalar(tileSize), ctx)
-                if(bomb.remaining < 0) {
-                    entity.eject()
-                    hostileSelected.iterate((hostileEntity) => {
-                        const hostilePos = hostileEntity.get(Pos)
-                        const hostileSpeed = hostileEntity.get(Speed)
-                        const hostile = hostileEntity.get(Hostile)
-                        if (hostilePos.distance2D(pos) < bomb.radius) {
-                            hostile.isActive = false
-                            hostileSpeed.setScalar(0)
-
+                switch(bomb.type) {
+                    case ATOMIC_BOMB_TYPE:
+                    case FREEZE_BOMB_TYPE:
+                    case FLASH_BOMB_TYPE:
+                    case DETECT_BOMB_TYPE:
+                    case TURTLE_BOMB_TYPE:
+                        if(bomb.remaining < 0) {
+                            bomb.triggered = false
+                            bomb.isArmed = false
+                            entity.eject()
+                            hostileSelected.iterate((hostileEntity) => {
+                                const hostilePos = hostileEntity.get(Pos)
+                                const hostileSpeed = hostileEntity.get(Speed)
+                                const hostile = hostileEntity.get(Hostile)
+                                
+                                if (hostilePos.distance2D(pos) < bomb.radius) {
+                                    if(bomb.type === FREEZE_BOMB_TYPE) {
+                                        hostile.effect = HOSTILE_EFFECT_FREEZE
+                                        hostile.freezeTime = HOSTILE_FREEZE_TIME
+                                    } else if(bomb.type === FLASH_BOMB_TYPE) {
+                                        hostile.effect = HOSTILE_EFFECT_DISORIENTED
+                                        hostile.effectTime = HOSTILE_DISORIENTED_TIME
+                                    } else {
+                                        hostile.isActive = false
+                                        hostileSpeed.setScalar(0)
+                                        ecs.create()
+                                        .add(
+                                            new Dead(performance.now()), 
+                                            new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
+                                        )
+                                    }
+                                    
+                                }
+                            })
                             ecs.create()
                             .add(
-                                new Dead(performance.now()), 
-                                new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
-                            )
+                                new Pos(pos.x, pos.y, pos.z),
+                                new Explosion(bomb.type)
+                                )
+        
+                        } else if(bomb.type === DETECT_BOMB_TYPE && bomb.triggered === false){
+                            hostileSelected.iterate((hostileEntity) => {
+                                const hostilePos = hostileEntity.get(Pos)
+                                const hostileSpeed = hostileEntity.get(Speed)
+                                const hostile = hostileEntity.get(Hostile)
+                                
+                                if (hostilePos.distance2D(pos) < bomb.radius) { 
+                                    bomb.triggered = true
+                                    bomb.remaining = TIME_BOMB_DETONATE_DELAY
+                                }
+
+                            })
+                        } else if(bomb.type === TURTLE_BOMB_TYPE && bomb.triggered === false){
+                            playerSelected.iterate((playerEntity) => {
+                                const playerPos = playerEntity.get(Pos)
+                                const playerSpeed = playerEntity.get(Speed)
+                                
+                                if (playerPos.distance2D(pos) < BOMB_COLLISON_RADIUS && bomb.isArmed && !entity.get(Speed)) { 
+                                    const speedVector = pos.clone().sub(playerPos).normalise().multiplyScalar(0.1)
+                                    entity.add(new Speed(speedVector.x, speedVector.y, speedVector.z), new Collidable(0,0,.4,.4))
+                                }
+                                if(playerPos.distance2D(pos) > BOMB_ARM_RADIUS) {
+                                    bomb.isArmed = true
+                                }
+
+                            })
                         }
-                    })
-                    ecs.create()
-                    .add(
-                        new Pos(pos.x, pos.y, pos.z),
-                        new Explosion()
-                        )
+                        break
+                    
 
                 }
+                
             })
             
         }
@@ -538,17 +595,38 @@ export const liveExplosions = (ecs, ctx) => {
             explosionSelector.iterate((explosionEntity) => {
                 const explosion = explosionEntity.get(Explosion)
                 explosion.remaining -= dt
-                ctx.fillStyle = `rgba(255,255,255,${ 1 - explosion.remaining / EXPLOSION_SFX_DURATION})`
                 if(explosion.remaining < 0) {
                     explosionEntity.eject()
                 } else {
                     const pos = explosionEntity.get(Pos)
-                    explosion.points.forEach(point => {
-                        ctx.beginPath()
-                        ctx.arc(point.x + pos.x * tileSize, point.y + pos.y * tileSize, EXPLOSION_SFX_SIZE * tileSize, 0, pi2)
-                        ctx.fill()
-                        point.multiplyScalar(1.33)
-                    });
+
+                    switch(explosion.bombType) {
+                        case ATOMIC_BOMB_TYPE:
+                        case TURTLE_BOMB_TYPE:
+                        case DETECT_BOMB_TYPE:
+                            explosion.points.forEach(point => {
+                                ctx.beginPath()
+                                ctx.arc(point.x + pos.x * tileSize, point.y + pos.y * tileSize, EXPLOSION_SFX_SIZE * tileSize, 0, pi2)
+                                ctx.fillStyle = `rgba(255,255,255,${ 1 - explosion.remaining / EXPLOSION_SFX_DURATION})`
+                                ctx.fill()
+                                point.multiplyScalar(1.33)
+                            });
+                            break
+                        case FREEZE_BOMB_TYPE: 
+                            ctx.beginPath()
+                            ctx.arc(pos.x * tileSize, pos.y * tileSize, 2 * tileSize, 0, pi2)
+                            ctx.fillStyle = `rgba(0,0,255,${ 1 - explosion.remaining / EXPLOSION_SFX_DURATION})`
+                            ctx.fill()
+                            break
+                        case FLASH_BOMB_TYPE: 
+                            ctx.beginPath()
+                            ctx.arc(pos.x * tileSize, pos.y * tileSize, 2 * tileSize, 0, pi2)
+                            ctx.fillStyle = `rgba(255,255,255, 1)`
+                            ctx.fill()
+                            break
+                        }
+
+                    
                 }
             })
         }
