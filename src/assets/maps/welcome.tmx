@@ -11,7 +11,7 @@
    </properties>
    <point/>
   </object>
-  <object id="2" x="4.79173" y="1.94172" width="108" height="19">
+  <object id="2" x="10.8364" y="3.23701" width="108" height="19">
    <properties>
     <property name="doors" type="int" value="2"/>
    </properties>

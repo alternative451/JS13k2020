@@ -1,6 +1,7 @@
 import { Vector } from "./libs/vector"
 import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, DETECT_BOMB_TYPE, BOMB_PROPERTIES_MAX_TIMER, TURTLE_BOMB_TYPE } from "./config"
 import { pi2 } from "./libs/utils"
+import { redAgent } from "./draw_helpers"
 
 export class Pos extends Vector {}
 export class Speed extends Vector {}
@@ -16,7 +17,7 @@ export class Spawn {
         for(let i = 0; i < this.maxHostiles; i ++) {
             let entity = ecs.create()
             this.hostiles.push(entity)
-            entity.add(new Hostile(), new Pos(0, 0, 0), new Shape(SMALL_CIRCLE), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
+            entity.add(new Hostile(), new Pos(0, 0, 0), new Agent(redAgent), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
         }
     }
     remaining() {
@@ -115,35 +116,13 @@ export class Bomb {
     }
 }
 
-export class Cooldown {
-    constructor(timer) {
-
-    }
-}
 
 export const CIRCLE = 0
 export const SQUARE = 1
 export const SMALL_CIRCLE = 2
-export class Shape {
-    constructor(shape) {
-        this.draw = (ctx, pos, tileSize) => {
-            ctx.fillStyle= "rgba(13, 53, 72, .8)"
-
-            if(shape === CIRCLE) {
-                ctx.beginPath()
-                ctx.arc(pos.x, pos.y, PLAYER_WIDTH * tileSize / 2, 0, pi2)
-                ctx.fill()
-                ctx.closePath()
-            } else if(shape === SMALL_CIRCLE) {
-                ctx.beginPath()
-                ctx.arc(pos.x, pos.y, HOSTILE_WIDTH * tileSize / 4, 0, pi2)
-                ctx.closePath()
-                ctx.fill()
-            } else {
-                ctx.stroke()
-                ctx.fillRect(pos.x - 8, pos.y - 8, 16, 16)
-            }
-        }
+export class Agent {
+    constructor(draw) {
+        this.draw = draw
     }
 }
 
@@ -328,4 +307,18 @@ export class Explosion {
     }
 }
 
-export class ExplosionParticle {}
+// 19
+
+export class Particle {}
+
+export class Eyes {}
+
+export class Status {}
+
+export class Explodable {
+    constructor() {
+        this.blink = 0
+        this.exploded = false
+    }
+}
+

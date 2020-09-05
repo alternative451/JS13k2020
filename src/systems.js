@@ -1,29 +1,17 @@
-import { Pos, Controlable, TrialState, Bomb, Shape, SQUARE, Hostile, Spawn, SMALL_CIRCLE, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion } from "./components"
+import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable } from "./components"
 import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
-import { drawBombCard, drawBomb } from "./draw_helpers"
+import { drawBombCard, drawBomb, deadAgent, redAgent, bombAgent } from "./draw_helpers"
 
 export const control = (ecs) => {
     const selected = ecs.select(Pos, Controlable, Acc, Speed)
-    const trials = ecs.select(TrialState, Controlable)
     const bombBagSelector = ecs.select(BombBag)
     let bombAvailable = true
 
     return {
         update : (dt) => {
-
-            trials.iterate((entity) => {
-                const {isUp, isDown} = entity.get(Controlable)
-                if(isUp) {
-                    entity.get(TrialState).isUpPressed = true
-                }
-                if(isDown) {
-                    entity.get(TrialState).isDownPressed = true
-                }
-            })
-
             selected.iterate((entity) => {
                 const {isUp, isDown, isLeft, isRight, isMain} = entity.get(Controlable)
                 const pos = entity.get(Pos)
@@ -66,7 +54,7 @@ export const control = (ecs) => {
                                 .add(
                                     bomb,
                                     new Pos(pos.x, pos.y, 0),
-                                    new Shape(SQUARE)
+                                    new Agent(bombAgent)
                                 )
                         }
                         
@@ -78,15 +66,15 @@ export const control = (ecs) => {
     }
 }
 
-export const draw = (ecs, ctx) => {
-    const selectedShape = ecs.select(Pos, Shape)
+export const drawAgent = (ecs, ctx) => {
+    const selectedAgent = ecs.select(Pos, Agent)
     const selectedWalls = ecs.select(Wall)
     return {
         update : (dt) => {
-            selectedShape.iterate((entityShape) => {
-                const pos = entityShape.get(Pos)
-                const shape = entityShape.get(Shape)
-                shape.draw(ctx, pos.clone().multiplyScalar(tileSize), tileSize)
+            selectedAgent.iterate((entityAgent) => {
+                const pos = entityAgent.get(Pos)
+                const agent = entityAgent.get(Agent)
+                agent.draw(pos.clone().multiplyScalar(tileSize), ctx, agent)
             })
 
             selectedWalls.iterate((entityWall) => {
@@ -94,8 +82,9 @@ export const draw = (ecs, ctx) => {
                 ctx.fillStyle = ""
                 ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
+            /* add border walls */
             ctx.fillRect(0,0,X_TILE_COUNT * tileSize, tileSize)
-            ctx.fillRect(0,Y_TILE_COUNT * tileSize, X_TILE_COUNT * tileSize, tileSize)
+            ctx.fillRect(0,(Y_TILE_COUNT - 1) * tileSize, X_TILE_COUNT * tileSize, tileSize)
             ctx.fillRect(0, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
             ctx.fillRect((X_TILE_COUNT - 1) * tileSize, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
 
@@ -223,15 +212,22 @@ export const livePreBlast = (ecs, ctx, cv) => {
 
 export const trialDisplay = (ecs, ctx) => {
     const selected = ecs.select(TrialState, Pos)
+    const spawnerSelector = ecs.select(Spawn)
+
     return {
-        update : (dt) => {
+        update: () => {
+            let remaining = -1
+            spawnerSelector.iterate((spawnerEntities) => {
+                remaining += spawnerEntities.get(Spawn).remaining()
+            })
             selected.iterate((entity) => {
                 const trialState = entity.get(TrialState)
                 const pos = entity.get(Pos)
                 ctx.textAlign = "center"
                 ctx.font = "50px sans-serif"
                 ctx.fillStyle = "rgba(100, 170, 220)"
-                ctx.fillText(trialState.sc, pos.x * tileSize, pos.y * tileSize)
+                const txt = trialState.sc.replace("%remain", remaining)
+                ctx.fillText(txt, pos.x * tileSize, pos.y * tileSize)
             })
         }
     }
@@ -276,6 +272,7 @@ export const liveBombs = (ecs, ctx) => {
                                         hostileSpeed.setScalar(0)
                                         ecs.create()
                                         .add(
+                                            new Agent(deadAgent),
                                             new Dead(performance.now()), 
                                             new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
                                         )
@@ -334,12 +331,6 @@ export const liveDead = (ecs, ctx) => {
             deadSelector.iterate((deadEndity) => {
                 const pos = deadEndity.get(Pos)
                 const dead = deadEndity.get(Dead)
-
-                ctx.fillStyle = "#eee"
-                ctx.beginPath()
-                ctx.arc(pos.x * tileSize, pos.y * tileSize, 10, 0, pi2)
-                ctx.closePath()
-                ctx.fill()
             })
         }
     }
@@ -378,12 +369,12 @@ export const collide = (ecs, ctx) => {
                     pos.y = -box.yMin + 1
                     speed.y = -speed.y
                 }
-                if (pos.x - box.xMax > X_TILE_COUNT - 2 ) {
-                    pos.x = X_TILE_COUNT - 2 + box.xMax
+                if (pos.x + box.xMax > X_TILE_COUNT - 1 ) {
+                    pos.x = X_TILE_COUNT - 1 - box.xMax
                     speed.x = -speed.x
                 }
-                if (pos.y - box.yMax > Y_TILE_COUNT - 1 ) {
-                    pos.y = Y_TILE_COUNT - 1 + box.yMax
+                if (pos.y + box.yMax > Y_TILE_COUNT - 1 ) {
+                    pos.y = Y_TILE_COUNT - 1 - box.yMax
                     speed.y = -speed.y
                 }
                 collided = false
@@ -397,30 +388,29 @@ export const collide = (ecs, ctx) => {
                         && fPos.x + box.xMax < wall.x + 1) {
                         if (fPos.y + box.yMax > wall.y && fPos.y + box.yMax < wall.y + 1) {
                             // bottom right point collide
-                            if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y).angle() && speed.y > 0) {
+                            if(speed.angle() < new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - wall.y).angle()) {
                                 // with vertical wall
-                                pos.y = wall.y + box.yMin
-                                pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
-                                speed.y = -speed.y
-                                collided = true
-                            } else {
-                                // by horizontal wall
-                                pos.x = wall.x + box.xMin
+                                pos.x = wall.x - box.xMax
                                 pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
                                 speed.x = -speed.x
                                 collided = true
+                            } else {
+                                // by horizontal wall
+                                pos.y = wall.y -  box.yMax
+                                pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
+                                speed.y = -speed.y
                             }
                         } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
                             // top right point collide
                             if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - (wall.y + 1)).angle()) {
                                 // with horiztona wall
-                                pos.y = wall.y + 1 + box.xMax
+                                pos.y = wall.y + box.xMax
                                 pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
                                 speed.y = -speed.y
                                 collided = true
                             } else {
                                 // with vertical wall
-                                pos.x = wall.x + box.xMin
+                                pos.x = wall.x - box.xMax
                                 pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
                                 speed.x = -speed.x
                                 collided = true
@@ -432,13 +422,13 @@ export const collide = (ecs, ctx) => {
                                 // bottom left point collide
                                 if(speed.angle() > new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMax) - wall.y).angle()) {
                                     // vertical wall
-                                    pos.x = wall.x + 1 + box.xMax
+                                    pos.x = wall.x + 1 + box.xMin
                                     pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
                                     speed.x = -speed.x
                                     collided = true
                                 } else {
                                     // hozizontal wall
-                                    pos.y = wall.y + box.yMin
+                                    pos.y = wall.y - box.yMax
                                     pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
                                     speed.y = -speed.y
                                     collided = true
@@ -447,13 +437,13 @@ export const collide = (ecs, ctx) => {
                                 // top left point collide
                                 if(speed.angle() < new Vector((fPos.x + box.xMin) - (wall.x + 1), (fPos.y + box.yMin) - (wall.y + 1)).angle()) { 
                                     // vertical wall
-                                    pos.x = wall.x + 1 + box.xMax
+                                    pos.x = wall.x + box.xMax
                                     pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
                                     speed.x = -speed.x
                                     collided = true
                                 } else {
                                     // hozizontal wall
-                                    pos.y = wall.y + 1 + box.xMax
+                                    pos.y = wall.y + box.yMax
                                     pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
                                     speed.y = -speed.y
                                     collided = true
@@ -562,7 +552,7 @@ export const liveDoors = (ecs, ctx) => {
 
 export const liveHp = (ecs, ctx) => {
     const playerSelector = ecs.select(Player)
-    const uiPos = new Vector((X_TILE_COUNT / 2 * tileSize) - 210, 20)
+    const uiPos = new Vector((X_TILE_COUNT / 2 * tileSize) - 210, 10)
 
     return {
         update: () => {
@@ -628,6 +618,20 @@ export const liveExplosions = (ecs, ctx) => {
 
                     
                 }
+            })
+        }
+    }
+}
+
+export const liveExplodable = (ecs, ctx) => {
+    const explodableSelector = ecs.select(Explodable, Pos)
+    return {
+        update: (dt) => {
+            explodableSelector.iterate((explodableEntity) => {
+                const pos = explodableEntity.get(Pos)
+                const explodable = explodableEntity.get(Explodable)
+                explodableEntity.blink++
+                drawExpodable(ctx, pos, explodableEntity)
             })
         }
     }

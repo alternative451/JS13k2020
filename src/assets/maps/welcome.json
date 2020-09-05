@@ -54,8 +54,8 @@
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":4.79173,
-                 "y":1.94172
+                 "x":10.8364124533512,
+                 "y":3.23700909714668
                 }, 
                 {
                  "height":0,
@@ -64,7 +64,7 @@
                  "point":true,
                  "properties":[
                         {
-                         "name":"isSpawn",
+                         "name":"issSpawn",
                          "type":"bool",
                          "value":true
                         }, 
@@ -82,8 +82,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":15.111706133378,
-                 "y":7.05212952890972
+                 "x":15.1117,
+                 "y":7.05213
                 }],
          "opacity":1,
          "type":"objectgroup",

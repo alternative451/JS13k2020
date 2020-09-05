@@ -1,6 +1,7 @@
 import welcome from "../assets/maps/welcome.json"
+import Home from "../assets/maps/home.json"
 
-import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb } from "../components"
+import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable } from "../components"
 import { createPlayer } from "./utils"
 import { X_TILE_COUNT } from "../config"
 
@@ -35,7 +36,6 @@ const process = (map, ecs, cv) => {
         }
         return acc
     }, [])
-    console.log(spawnObjects)
     spawnObjects.forEach((spawnObject) => {
         ecs
         .create()
@@ -44,16 +44,34 @@ const process = (map, ecs, cv) => {
             new Pos(spawnObject.x, spawnObject.y, 0),
         )
     })
+    objects.forEach((acc, object) => {
+        console.log(object)
+
+        if(object.properties) {
+            if(object.properties.find((propertie) => propertie.name === "isDestroyable")) {
+                console.log("laoded")
+                acc.push({x : object.x, y: object.y})
+                ecs
+                    .create()
+                    .add(
+                        new Explodable(),
+                        new Pos(object.x, object.y, 0)
+                    )
+            }
+        }
+        return acc
+    }, [])
+    
     
     // Text
     const textObject = objects.find((object) => {
-        return object.text && object.text.length > 0
+        return object.text && object.text.text.length > 0
     })
     if(textObject) {
         ecs
         .create()
         .add(
-            new TrialState(textObject.text),
+            new TrialState(textObject.text.text),
             new Pos(textObject.x, textObject.y),
             new Controlable(),
         )
@@ -89,7 +107,7 @@ const cleanMap = (ecs) => {
 }
 
 export const mapLoader = (ecs) => {
-    const maps = [welcome]
+    const maps = [welcome, Home]
     let currentMap = -1
     
     return {

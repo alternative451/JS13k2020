@@ -1,5 +1,6 @@
 import { PLAYER_WIDTH, PLAYER_HEIGHT } from "../config"
-import { Shape, CIRCLE, Pos, Speed, Acc, Controlable, Player, Collidable, BombBag, HpBar } from "../components"
+import { Pos, Speed, Acc, Controlable, Player, Collidable, BombBag, Agent } from "../components"
+import { blueAgent } from "../draw_helpers"
 
 export const clamp = (val, min, max) => {
     return Math.max(min, Math.min(max, val))
@@ -15,13 +16,13 @@ export const createPlayer = (ecs, pos) =>  {
     ecs
     .create()
     .add(
-        new Shape(CIRCLE),
+        new Agent(blueAgent),
         new Pos(pos.x, pos.y, pos.z),
         new Speed(0, 0, 0),
         new Acc(0, 0, 0),
         new Controlable(),
         new Player(),
-        new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2)
+        new Collidable(0, 0, PLAYER_WIDTH, PLAYER_HEIGHT)
     )
    
 }
