@@ -1,9 +1,9 @@
 import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable } from "./components"
-import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS } from "./config"
+import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
-import { drawBombCard, drawBomb, deadAgent, redAgent, bombAgent } from "./draw_helpers"
+import { drawBombCard, drawBomb, deadAgent, redAgent, bombAgent, drawExplodable, drawBombEffect } from "./draw_helpers"
 
 export const control = (ecs) => {
     const selected = ecs.select(Pos, Controlable, Acc, Speed)
@@ -71,6 +71,7 @@ export const drawAgent = (ecs, ctx) => {
     const selectedWalls = ecs.select(Wall)
     return {
         update : (dt) => {
+            
             selectedAgent.iterate((entityAgent) => {
                 const pos = entityAgent.get(Pos)
                 const agent = entityAgent.get(Agent)
@@ -83,11 +84,13 @@ export const drawAgent = (ecs, ctx) => {
                 ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
             /* add border walls */
-            ctx.fillRect(0,0,X_TILE_COUNT * tileSize, tileSize)
-            ctx.fillRect(0,(Y_TILE_COUNT - 1) * tileSize, X_TILE_COUNT * tileSize, tileSize)
-            ctx.fillRect(0, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
-            ctx.fillRect((X_TILE_COUNT - 1) * tileSize, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
-
+            if(selectedWalls.list) {
+                ctx.fillRect(0, 0, X_TILE_COUNT * tileSize, tileSize)
+                ctx.fillRect(0, (Y_TILE_COUNT - 1) * tileSize, X_TILE_COUNT * tileSize, tileSize)
+                ctx.fillRect(0, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
+                ctx.fillRect((X_TILE_COUNT - 1) * tileSize, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
+            }
+           
         }
     }
 }
@@ -140,6 +143,9 @@ export const ia = (ecs) => {
                     if(hostile.effectTime < 0 && hostile.effect) {
                         hostile.effect = false
                     }
+                    if (hostile.status === HOSTILE_EFFECT_SLEEP) {
+                        return
+                    }
                     if (hostile.isActive) {
                         const hostilePos = entity.get(Pos)
                         const hostileSpeed = entity.get(Speed)
@@ -155,9 +161,10 @@ export const ia = (ecs) => {
                             hostileSpeed.set(b.normalise().multiplyScalar(HOSTILE_SPEED))
                         }
                         
-
                         // try an attack
-                        if (playerPos.distance2D(hostilePos) < 1 && !hostile.isAttacking) {
+                        if (playerPos.distance2D(hostilePos) < 1 && !hostile.isAttacking && 
+                            hostile.effect !== HOSTILE_EFFECT_NONE
+                        ) {
                             hostile.isAttacking = true
                             ecs.create()
                                 .add(
@@ -237,6 +244,8 @@ export const liveBombs = (ecs, ctx) => {
     const selected = ecs.select(Bomb)
     const hostileSelected = ecs.select(Hostile, Pos)
     const playerSelected = ecs.select(Player)
+    const explodableSelector = ecs.select(Explodable, Pos)
+
     return {
         update: (dt) => {
             selected.iterate((entity) => {
@@ -244,7 +253,7 @@ export const liveBombs = (ecs, ctx) => {
                 const pos = entity.get(Pos)
                 bomb.remaining -= dt
                 // atomic bomb
-                drawBomb(bomb, pos.clone().multiplyScalar(tileSize), ctx)
+                drawBombEffect(bomb, pos.clone().multiplyScalar(tileSize), ctx)
                 switch(bomb.type) {
                     case ATOMIC_BOMB_TYPE:
                     case FREEZE_BOMB_TYPE:
@@ -255,10 +264,20 @@ export const liveBombs = (ecs, ctx) => {
                             bomb.triggered = false
                             bomb.isArmed = false
                             entity.eject()
+                            explodableSelector.iterate((explodableEntity) => {
+                                const explodablePos = explodableEntity.get(Pos)
+                                const explodable = explodableEntity.get(Explodable)
+                                if (explodablePos.distance2D(pos) < bomb.radius) {
+                                    explodable.exploded = true
+                                }
+                            })
                             hostileSelected.iterate((hostileEntity) => {
                                 const hostilePos = hostileEntity.get(Pos)
                                 const hostileSpeed = hostileEntity.get(Speed)
                                 const hostile = hostileEntity.get(Hostile)
+                                if(hostile.status === HOSTILE_EFFECT_SLEEP) {
+                                    hostile.status = null
+                                }
                                 
                                 if (hostilePos.distance2D(pos) < bomb.radius) {
                                     if(bomb.type === FREEZE_BOMB_TYPE) {
@@ -331,6 +350,7 @@ export const liveDead = (ecs, ctx) => {
             deadSelector.iterate((deadEndity) => {
                 const pos = deadEndity.get(Pos)
                 const dead = deadEndity.get(Dead)
+                deadAgent(pos, ctx)
             })
         }
     }
@@ -342,7 +362,17 @@ export const liveUi = (ecs, ctx) => {
         update: () => {
             selected.iterate((entity) => {
                 const ui = entity.get(UI)
-                ctx.fillText(ui.text, ui.x, ui.y)
+                if (ui.isButton) {
+                    ctx.fillStyle = "#fff"
+                    ctx.fillRect(ui.x, ui.y, 300, 100)
+                    ctx.textAlign = "center"
+                    ctx.fillStyle = "#000"
+                    ctx.fillText(ui.text, ui.x + 150, ui.y + 50)
+                } else {
+                    ctx.fillStyle = "#000"
+                    ctx.fillText(ui.text, ui.x + 150, ui.y + 50)
+                }
+                
             })
         }
     }
@@ -561,6 +591,7 @@ export const liveHp = (ecs, ctx) => {
                 if(playerComponent.hp <= 0) {
                     mapLoader.unload(ecs)
                     window.currentScreen = dieScreen(ecs, tileSize)
+                    window.currentScreen.load()
                 } else {
                     ctx.fillStyle = "#000"
                     ctx.fillRect(uiPos.x, uiPos.y, 420, 50)
@@ -630,8 +661,8 @@ export const liveExplodable = (ecs, ctx) => {
             explodableSelector.iterate((explodableEntity) => {
                 const pos = explodableEntity.get(Pos)
                 const explodable = explodableEntity.get(Explodable)
-                explodableEntity.blink++
-                drawExpodable(ctx, pos, explodableEntity)
+                explodable.blink++
+                drawExplodable(ctx, pos, explodable)
             })
         }
     }

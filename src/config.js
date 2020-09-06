@@ -8,9 +8,12 @@ export const PLAYER_BASE_FRICTION = .02
 export const PLAYER_WIDTH = 1
 export const PLAYER_HEIGHT = 1
 
+export const RED_WIDTH = 1
+export const RED_HEIGHT = 1
+
 export const BOMB_PROPERTIES_RADIUS = 3 
 export const BOMB_PROPERTIES_TIMER = 2500
-export const BOMB_PROPERTIES_MAX_TIMER = 30000
+export const BOMB_PROPERTIES_MAX_TIMER = 10000
 
 export const EXPLOSION_SFX_DURATION = 300
 export const EXPLOSION_SFX_COUNT = 9
@@ -24,8 +27,11 @@ export const HOSTILE_SPEED = .1
 export const HOSTILE_BOMB_DAMAGE = 15
 export const SPAWNER_CD = 1000
 
+export const HOSTILE_EFFECT_NONE = -1
 export const HOSTILE_EFFECT_FREEZE = 0
 export const HOSTILE_EFFECT_DISORIENTED = 1
+export const HOSTILE_EFFECT_SLEEP = 3
+export const HOSTILE_SLEEP_AWAKE_RANGE = 2
 
 export const DEAD_LIVE = 3000
 

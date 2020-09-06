@@ -1,20 +1,40 @@
 import welcome from "../assets/maps/welcome.json"
 import Home from "../assets/maps/home.json"
 
-import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable } from "../components"
-import { createPlayer } from "./utils"
-import { X_TILE_COUNT } from "../config"
+import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable } from "../components"
+import { createPlayer, createRed } from "./utils"
+import { X_TILE_COUNT } from "../config" 
+
+const getObjects = (objectName, objects, ...properties) => {
+    return objects.reduce((accs, current) => {
+        const object = current.properties.find((propertie) => {
+            return propertie.name === objectName
+        })
+        if(object) {
+            accs.push(
+                {
+                    x: current.x, y: current.y, ...current.properties.reduce((acc, propertie) => {
+                        if (properties.indexOf(propertie.name) !== -1) {
+                            acc[propertie.name] = propertie.value
+                        }
+                        return acc
+                    }, {})
+                }
+            )
+        }
+        return accs
+    }, [])
+
+}
+
 
 const process = (map, ecs, cv) => {
     const objects = map.layers[0].objects
     // player
-    const startObject = objects.find((object) => {
-        if(object.properties) {
-            return object.properties.find((propertie) => propertie.name === "isStart")
-        }
-    })
-    if(startObject) {
-        const start = new Pos(startObject.x, startObject.y)
+    const startObjects = getObjects("isStart", objects)
+
+    if(startObjects.length > 0) {
+        const start = new Pos(startObjects[0].x, startObjects[0].y)
         createPlayer(ecs, new Pos(start.x,start.y,0))
     }
     // door
@@ -26,16 +46,7 @@ const process = (map, ecs, cv) => {
     
 
     // spawns
-    const spawnObjects = objects.reduce((acc, object) => {
-        if(object.properties) {
-            if(object.properties.find((propertie) => propertie.name === "isSpawn")) {
-                const max = object.properties.find((prop) => prop.name === "max").value
-                const total = object.properties.find((prop) => prop.name === "total").value
-                acc.push({x : object.x, y: object.y, total, max})
-            }
-        }
-        return acc
-    }, [])
+    const spawnObjects = getObjects("isSpawn", objects, "max", "total")
     spawnObjects.forEach((spawnObject) => {
         ecs
         .create()
@@ -44,24 +55,23 @@ const process = (map, ecs, cv) => {
             new Pos(spawnObject.x, spawnObject.y, 0),
         )
     })
-    objects.forEach((acc, object) => {
-        console.log(object)
 
-        if(object.properties) {
-            if(object.properties.find((propertie) => propertie.name === "isDestroyable")) {
-                console.log("laoded")
-                acc.push({x : object.x, y: object.y})
-                ecs
-                    .create()
-                    .add(
-                        new Explodable(),
-                        new Pos(object.x, object.y, 0)
-                    )
-            }
-        }
-        return acc
-    }, [])
+    const reds = getObjects("isRed", objects, "status")
+    reds.forEach((red) => {
+        createRed(ecs, new Pos(red.x, red.y, 0), true, red.status)
+    })
     
+    const destroyables = getObjects("isDestroyable", objects)
+    destroyables.forEach((destroyable) => {
+        ecs
+            .create()
+            .add(
+                new Explodable(),
+                new Pos(destroyable.x, destroyable.y, 0)
+            )
+    })
+
+
     
     // Text
     const textObject = objects.find((object) => {
@@ -93,7 +103,7 @@ const process = (map, ecs, cv) => {
 } 
 
 const cleanMap = (ecs) => {
-    const Entities = [Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb]
+    const Entities = [Explodable ,Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb]
     Entities.forEach((entityName) => {
         ecs.select(entityName).iterate((entityEntity) => {
             entityEntity.eject()

@@ -64,7 +64,7 @@
                  "point":true,
                  "properties":[
                         {
-                         "name":"issSpawn",
+                         "name":"isSpawn",
                          "type":"bool",
                          "value":true
                         }, 
@@ -76,7 +76,7 @@
                         {
                          "name":"total",
                          "type":"int",
-                         "value":11
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"",

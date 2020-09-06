@@ -22,16 +22,21 @@
                  "point":true,
                  "properties":[
                         {
-                         "name":"isDestroyable",
+                         "name":"isRed",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"status",
+                         "type":"string",
+                         "value":"sleep"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":6.42625081221572,
-                 "y":7.44747671648256
+                 "x":12.9536011080332,
+                 "y":7.89127423822715
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -55,12 +60,12 @@
  "nextobjectid":2,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/..\/..\/..\/..\/..\/Desktop\/aos.tsx"
+         "source":"aos.tsx"
         }],
  "tilewidth":1,
  "type":"map",

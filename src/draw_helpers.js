@@ -57,7 +57,7 @@ export const drawBombCard = (pos, bombSlot, i, ctx, isRolling, rollingRatio) => 
     }
 }
 
-export const drawBomb = (bomb, pos, ctx) => {
+export const drawBombEffect = (bomb, pos, ctx) => {
     // area
     ctx.lineWidth = 2
     switch(bomb.type) {
@@ -101,35 +101,39 @@ export const blueAgent = (pos, ctx, agent) => { // you
 }
 
 export const redAgent = (pos, ctx, agent) => { // you
-    ctx.fillStyle = "#f00"
+    ctx.fillStyle = "#fff"
     ctx.fillRect(pos.x, pos.y, 1 * tileSize, 1 * tileSize)
-    ctx.fillStyle = agent.color
+    ctx.fillStyle = "#f00"
     ctx.fillRect(pos.x + 2, pos.y + 2, 1 * tileSize - 4, 1 * tileSize - 4)
 }
 
 export const deadAgent = (pos, ctx, agent) => { // you
     ctx.fillStyle = "#fff"
-    ctx.fillRect(pos.x, pos.y, 1 * tileSize, 1 * tileSize)
-    ctx.fillStyle = agent.color
-    ctx.fillRect(pos.x + 2, pos.y + 2, 1 * tileSize - 4, 1 * tileSize - 4)
+    ctx.fillRect(pos.x * tileSize, pos.y * tileSize, 1 * tileSize, 1 * tileSize)
+    ctx.fillStyle = "#000"
+    ctx.fillRect(pos.x * tileSize + 2, pos.y * tileSize + 2, 1 * tileSize - 4, 1 * tileSize - 4)
 }
 
 export const bombAgent = (pos, ctx, agent) => {
-    ctx.fillStyle = "#f00"
-    ctx.fillRect(pos.x, pos.y, 0.5 * tileSize, .5 * tileSize)
-    ctx.fillStyle = agent.color
-    ctx.fillRect(pos.x + 2, pos.y + 2, .5 * tileSize - 4, .5 * tileSize - 4)
+    ctx.fillStyle = "#fff"
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, .5 * tileSize, 0, pi2)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = "#000"
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, .5 * tileSize - 2, 0, pi2)
+    ctx.closePath()
+    ctx.fill()
 }
 
 export const drawExplodable = (ctx, pos, explodableEntity) => {
-    ctx.fillStyle = "#000"
+    console.log(explodableEntity.exploded)
+    ctx.fillStyle = explodableEntity.exploded ? "#000" : "#fff"
     ctx.fillRect(pos.x * tileSize, pos.y * tileSize, tileSize, tileSize)
-  //  ctx.beginPath()
-  //  ctx.rect(tileSize * pos.x + 10, tileSize * pos.y, tileSize - 20, tileSize - 20)
-   // ctx.strokeStyle = rgba(0, 255, 255, Math.cos(explodableEntity.blink / 1000))
-   // ctx.stroke()
 }
 
 export const drawEyes = (pos, ctx, eye) => {
+
 
 }

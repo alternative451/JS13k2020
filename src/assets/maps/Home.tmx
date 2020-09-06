@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="2">
  <editorsettings>
   <export target="home.json" format="json"/>
  </editorsettings>
- <tileset firstgid="1" source="../../../../../../Desktop/aos.tsx"/>
- <objectgroup id="2" name="Calque d'Objets 1"/>
+ <tileset firstgid="1" source="aos.tsx"/>
+ <objectgroup id="2" name="Calque d'Objets 1">
+  <object id="1" x="12.9536" y="7.89127">
+   <properties>
+    <property name="isRed" type="bool" value="true"/>
+    <property name="status" value="sleep"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

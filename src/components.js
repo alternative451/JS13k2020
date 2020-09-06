@@ -1,6 +1,6 @@
 import { Vector } from "./libs/vector"
 import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, DETECT_BOMB_TYPE, BOMB_PROPERTIES_MAX_TIMER, TURTLE_BOMB_TYPE } from "./config"
-import { pi2 } from "./libs/utils"
+import { pi2, createRed } from "./libs/utils"
 import { redAgent } from "./draw_helpers"
 
 export class Pos extends Vector {}
@@ -15,9 +15,7 @@ export class Spawn {
         this.hostiles = []
 
         for(let i = 0; i < this.maxHostiles; i ++) {
-            let entity = ecs.create()
-            this.hostiles.push(entity)
-            entity.add(new Hostile(), new Pos(0, 0, 0), new Agent(redAgent), new Speed(0,0,0), new Collidable(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2))
+            this.hostiles.push(createRed(ecs, new Pos(0, 0, 0), false))
         }
     }
     remaining() {
@@ -134,9 +132,10 @@ export class Dead {
 
 export const EXPLODE_TYPE = 1
 export class Hostile {
-    constructor(target, type) {
+    constructor(target, type, isActive, status) {
+        this.status = status
         this.target = target
-        this.isActive = false
+        this.isActive = isActive
         this.type = type
         this.isAttacking = false
         this.effect = null
@@ -158,10 +157,11 @@ export class Player {
 }
 
 export class UI {
-    constructor(text, x, y, fn) {
+    constructor(text, x, y, fn, isButton) {
         this.text = text
         this.x = x
         this.y = y
+        this.isButton = isButton
         this.add = (e) => {
             if (Math.abs(e.pageX - x) < 100 && Math.abs(e.pageY - y) < 100) {
                 fn()
@@ -194,7 +194,7 @@ export class BombSlot {
         this.bomb = null
     }
     use() {
-        this.bomb = new Bomb(this.type, this.type === DETECT_BOMB_TYPE ? BOMB_PROPERTIES_MAX_TIMER : BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS)
+        this.bomb = new Bomb(this.type, (this.type === DETECT_BOMB_TYPE || this.type === TURTLE_BOMB_TYPE) ? BOMB_PROPERTIES_MAX_TIMER : BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS)
         this.isAvailable = false
         return this.bomb
     }
