@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="4">
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="5">
  <editorsettings>
   <export target="welcome.json" format="json"/>
  </editorsettings>
- <tileset firstgid="1" source="../../../../../../Desktop/aos.tsx"/>
+ <properties>
+  <property name="bombs" value="1,1,1"/>
+  <property name="canRoll" type="bool" value="false"/>
+ </properties>
+ <tileset firstgid="1" source="aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
   <object id="1" x="4.78233" y="6.00282">
    <properties>
@@ -22,6 +26,12 @@
     <property name="isSpawn" type="bool" value="true"/>
     <property name="max" type="int" value="2"/>
     <property name="total" type="int" value="11"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" x="15.3995" y="9.57075">
+   <properties>
+    <property name="isDestroyable" type="bool" value="true"/>
    </properties>
    <point/>
   </object>

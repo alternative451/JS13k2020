@@ -1,7 +1,7 @@
 import welcome from "../assets/maps/welcome.json"
 import Home from "../assets/maps/home.json"
 
-import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable } from "../components"
+import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable, UI, Player, PreBlast, Blast } from "../components"
 import { createPlayer, createRed } from "./utils"
 import { X_TILE_COUNT } from "../config" 
 
@@ -29,14 +29,36 @@ const getObjects = (objectName, objects, ...properties) => {
 
 
 const process = (map, ecs, cv) => {
+    
+
+   
+    
+
     const objects = map.layers[0].objects
     // player
     const startObjects = getObjects("isStart", objects)
-
     if(startObjects.length > 0) {
         const start = new Pos(startObjects[0].x, startObjects[0].y)
         createPlayer(ecs, new Pos(start.x,start.y,0))
     }
+
+    const bombsProperties = map.properties.find((propertie) => propertie.name === "bombs")
+
+    if(bombsProperties) {
+        const bombs = bombsProperties.value.split(",").map((bomb) => parseInt(bomb, 10))
+        ecs.select(BombBag).iterate((bombBagEntity) => {
+            bombBagEntity.get(BombBag).set(bombs)
+        })
+    }
+    const canRollProperties = map.properties.find((propertie) => propertie.name === "canRoll")
+
+    if(canRollProperties) {
+        ecs.select(BombBag).iterate((bombBagEntity) => {
+            bombBagEntity.get(BombBag).canRoll = canRollProperties.value
+        })
+    }
+    
+ 
     // door
     ecs.create() 
     .add(
@@ -96,14 +118,11 @@ const process = (map, ecs, cv) => {
                 new Wall(index % X_TILE_COUNT, Math.floor(index / X_TILE_COUNT))
             )
         }
-        
     })
-    
-
 } 
 
 const cleanMap = (ecs) => {
-    const Entities = [Explodable ,Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb]
+    const Entities = [Explodable ,Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb, PreBlast, Blast]
     Entities.forEach((entityName) => {
         ecs.select(entityName).iterate((entityEntity) => {
             entityEntity.eject()
@@ -113,7 +132,6 @@ const cleanMap = (ecs) => {
     bb.iterate((bbEntity) => {
         bbEntity.get(BombBag).roll()
     })
-
 }
 
 export const mapLoader = (ecs) => {
@@ -123,6 +141,15 @@ export const mapLoader = (ecs) => {
     return {
         unload: () => {
             cleanMap(ecs)
+        },
+
+        init: () => {
+            cleanMap(ecs)
+            currentMap = 0
+            ecs.select(Player).iterate((playerEntity) => {
+                playerEntity.get(Player).hp = 100
+            }) 
+            process(maps[currentMap], ecs)
         },
 
         next: () => {

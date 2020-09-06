@@ -356,22 +356,28 @@ export const liveDead = (ecs, ctx) => {
     }
 }
 
-export const liveUi = (ecs, ctx) => {
+export const liveUi = (ecs, ctx, cv) => {
     const selected = ecs.select(UI)
     return {
         update: () => {
             selected.iterate((entity) => {
                 const ui = entity.get(UI)
+                if(ui.isHover) {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
+                    ctx.fillRect(0, ui.y - 10, cv.width, 120)
+                }
+                ctx.font = `${tileSize}px Arial`
                 if (ui.isButton) {
                     ctx.fillStyle = "#fff"
                     ctx.fillRect(ui.x, ui.y, 300, 100)
                     ctx.textAlign = "center"
                     ctx.fillStyle = "#000"
-                    ctx.fillText(ui.text, ui.x + 150, ui.y + 50)
+                    ctx.fillText(ui.text, ui.x + 150, ui.y + 60)
                 } else {
                     ctx.fillStyle = "#000"
                     ctx.fillText(ui.text, ui.x + 150, ui.y + 50)
                 }
+               
                 
             })
         }
@@ -509,7 +515,7 @@ export const liveBombBag = (ecs, ctx, tileSize) => {
                     drawBombCard(pos, bombSlot, i, ctx, bombBag.isRolling, bombBag.rollTime / BOMBAG_ROLL_DURATION)
                 }
 
-                if (!bombBag.isAvailable() && bombBag.isAllExploded() && !bombBag.isRolling) {
+                if (!bombBag.isAvailable() && bombBag.isAllExploded() && !bombBag.isRolling && bombBag.canRoll) {
                     bombBag.initRoll()
                 }
             })
@@ -580,7 +586,7 @@ export const liveDoors = (ecs, ctx) => {
     }
 }
 
-export const liveHp = (ecs, ctx) => {
+export const liveHp = (ecs, ctx, cv) => {
     const playerSelector = ecs.select(Player)
     const uiPos = new Vector((X_TILE_COUNT / 2 * tileSize) - 210, 10)
 
@@ -588,9 +594,10 @@ export const liveHp = (ecs, ctx) => {
         update: () => {
             playerSelector.iterate((playerEntity) => {
                 const playerComponent = playerEntity.get(Player)
-                if(playerComponent.hp <= 0) {
+                if(playerComponent.hp <= 0 && window.currentScreen.isGame) {
                     mapLoader.unload(ecs)
-                    window.currentScreen = dieScreen(ecs, tileSize)
+                    window.currentScreen.unload()
+                    window.currentScreen = dieScreen(ecs, tileSize, cv)
                     window.currentScreen.load()
                 } else {
                     ctx.fillStyle = "#000"

@@ -1,13 +1,25 @@
 import { Shape, Pos, Speed, Acc, Controlable, Player, Spawn, TrialState, CIRCLE, UI, Wall, Collidable, BombBag, Door } from "./components"
 import { X_TILE_COUNT, Y_TILE_COUNT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
-        export const title = (ecs, cv) => {
+      
+const cleanScreen = (ecs) => {
+    const Entities = [UI, Player, BombBag]
+    Entities.forEach((entityName) => {
+        ecs.select(entityName).iterate((entityEntity) => {
+            entityEntity.eject()
+        })
+    })
+
+}
+
+export const title = (ecs, cv) => {
             return {
                 isGame : false,
                 load: () => {
                     ecs.create()
-                        .add(new UI("Start", cv.width / 2, cv.height / 2, () => {
+                        .add(new UI("Play game !", cv.width / 2 - 150, cv.height / 2, () => {
                             window.currentScreen.unload()
-                            window.currentScreen = gameScreen(ecs).load()
+                            window.currentScreen = gameScreen(ecs)
+                            window.currentScreen.load()
                         }, true))
                 },
                 unload: () => {
@@ -24,25 +36,27 @@ import { X_TILE_COUNT, Y_TILE_COUNT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./confi
                     window.mapLoader.next(ecs)
                 },
                 unload : () => {
+                    cleanScreen(ecs)
                     window.mapLoader.unload(ecs)
                 }
             }
             
         }
-        export const dieScreen = (ecs, tileSize) => {
+        export const dieScreen = (ecs, tileSize, cv) => {
             return {
                 isGame: false,
                 load : () => {
                     ecs.create()
-                        .add(new UI("You died", X_TILE_COUNT * tileSize / 2, Y_TILE_COUNT * tileSize / 2, () => { }, false))
+                        .add(new UI("You died",cv.width / 2 - 150, cv.height / 2, () => { }, false))
                     ecs.create()
-                        .add(new UI("Restart", X_TILE_COUNT * tileSize / 2, Y_TILE_COUNT * tileSize / 2 + 150, () => {
+                        .add(new UI("Restart",cv.width / 2 - 150, cv.height / 2 + 150, () => {
                             window.currentScreen.unload()
-                            window.currentScreen = gameScreen(ecs).load()
+                            window.currentScreen = gameScreen(ecs)
+                            window.mapLoader.init()
                         }, true))
                 },
                 unload : () => {
-
+                    cleanScreen(ecs)
                 }
             }
             

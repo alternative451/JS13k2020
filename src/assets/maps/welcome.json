@@ -54,8 +54,8 @@
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":10.8364124533512,
-                 "y":3.23700909714668
+                 "x":10.8364,
+                 "y":3.23701
                 }, 
                 {
                  "height":0,
@@ -76,7 +76,7 @@
                         {
                          "name":"total",
                          "type":"int",
-                         "value":4
+                         "value":11
                         }],
                  "rotation":0,
                  "type":"",
@@ -84,6 +84,24 @@
                  "width":0,
                  "x":15.1117,
                  "y":7.05213
+                }, 
+                {
+                 "height":0,
+                 "id":4,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isDestroyable",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":15.3995481549661,
+                 "y":9.57074721780604
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -104,15 +122,26 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":4,
+ "nextobjectid":5,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"bombs",
+         "type":"string",
+         "value":"1,1,1"
+        }, 
+        {
+         "name":"canRoll",
+         "type":"bool",
+         "value":false
+        }],
  "renderorder":"left-up",
  "tiledversion":"1.4.1",
  "tileheight":1,
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/..\/..\/..\/..\/..\/Desktop\/aos.tsx"
+         "source":"aos.tsx"
         }],
  "tilewidth":1,
  "type":"map",

@@ -162,15 +162,28 @@ export class UI {
         this.x = x
         this.y = y
         this.isButton = isButton
+        this.isHover = false
         this.add = (e) => {
-            if (Math.abs(e.pageX - x) < 100 && Math.abs(e.pageY - y) < 100) {
+            if (e.pageY > y && e.pageY < y + 150 ) {
                 fn()
             }
         }
-        window.addEventListener("mousedown", this.add)
+        this.move = (e) => {
+            if (e.pageY > y && e.pageY < y + 150 ) {
+                this.isHover = true
+            } else {
+                this.isHover = false
+            }
+        }
+        if(this.isButton) {
+            window.addEventListener("mousedown", this.add)
+            window.addEventListener("mousemove", this.move)
+        }
     }
     destructor() {
-        window.removeEventListener("mousedown", this.add)
+        if(this.isButton) {
+            window.removeEventListener("mousedown", this.add)
+        }
     }
 }
 
@@ -202,6 +215,10 @@ export class BombSlot {
         this.type = Math.floor(Math.random() * 5)
         this.isAvailable = true
     }
+    set(bomb) {
+        this.type = bomb
+        this.isAvailable = true
+    }
 }
 
 export class BombBag {
@@ -210,6 +227,7 @@ export class BombBag {
         this.disabled = 0
         this.bombSlots = []
         this.isRolling = false
+        this.canRoll = true
         this.rollAt = -1
         for(let i = 0; i < maxSize; i ++) {
             this.bombSlots.push(new BombSlot(cd))
@@ -256,6 +274,13 @@ export class BombBag {
             }
         }
     }
+
+    set(bombs) {
+        bombs.forEach((bomb, i) => {
+            this.bombSlots[i].set(bomb)
+        })
+    }
+
     disable(ecs, cv) {
         this.disabled ++
         if(this.disabled === this.maxSize) {
