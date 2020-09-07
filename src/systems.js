@@ -1,5 +1,5 @@
 import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable } from "./components"
-import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
+import { PREBLAST_SFX_LINE_COUNT, BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
@@ -148,6 +148,19 @@ export const ia = (ecs, ctx) => {
             wallSelector.iterate((entityWall) => {
                 const wall = entityWall.get(Wall)
                 mappedGrid[wall.x][wall.y] = 0
+                if(wall.x < X_TILE_COUNT) {
+                    mappedGrid[wall.x + 1][wall.y] = 0
+                } 
+                if(wall.x > 0) {
+                    mappedGrid[wall.x - 1][wall.y] = 0
+                } 
+                if(wall.y < Y_TILE_COUNT) {
+                    mappedGrid[wall.x][wall.y + 1] = 0
+                } 
+                if(wall.y > 0) {
+                    mappedGrid[wall.x][wall.y - 1] = 0
+                } 
+                mappedGrid[wall.x][wall.y] = 0
             })
             
             const graph = new Graph(mappedGrid)
@@ -180,7 +193,7 @@ export const ia = (ecs, ctx) => {
                         } else {
                             let res = []
                             if(hostilePos) {
-                                res = astar.search(graph, graph.grid[Math.floor(playerPos.x)][Math.floor(playerPos.y)], 
+                                res = astar.search(graph, graph.grid[Math.floor(playerPos.x + .5)][Math.floor(playerPos.y + .5)], 
                                 graph.grid[Math.floor(hostilePos.x)][Math.floor(hostilePos.y)])
                            
                                 res.forEach((brick) => {
@@ -235,9 +248,23 @@ export const livePreBlast = (ecs, ctx, cv) => {
                 const pos = preblasEntity.get(Pos)
                 ctx.beginPath()
                 ctx.arc(pos.x * tileSize, pos.y * tileSize, tileSize * BLAST_RADIUS, 0, pi2)
-                ctx.fillStyle = "rgba(200,200,200, .4)"
+                ctx.lineWidth = 2
                 ctx.closePath()
-                ctx.fill()
+                ctx.strokeStyle = "#971313"
+                ctx.stroke()
+                const bRadius = tileSize * BLAST_RADIUS
+                const dY = 2 * bRadius / (PREBLAST_SFX_LINE_COUNT + 1)
+                for(let i = 0; i < PREBLAST_SFX_LINE_COUNT; i ++) {
+                    const y = dY * (i + 1) - bRadius
+                    const x = Math.sqrt(bRadius * bRadius - y * y)
+                    const lX = pos.x * tileSize - x
+                    const rX = pos.x * tileSize + x
+                    const endY = pos.y * tileSize + y 
+                    ctx.beginPath()
+                    ctx.moveTo(lX, endY)
+                    ctx.lineTo(rX,endY)
+                    ctx.stroke()
+                }
                 if (performance.now() - preblast.at > PRE_BLAST_DURATION ) {
                     selectedPlayer.iterate((playerEntity) => {
                         const playerPos = playerEntity.get(Pos)

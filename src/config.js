@@ -20,6 +20,8 @@ export const EXPLOSION_SFX_COUNT = 9
 export const EXPLOSION_SFX_SIZE = .5
 export const EXPLOSION_SFX_PROPAGATION = 1
 
+export const PREBLAST_SFX_LINE_COUNT = 16
+
 export const BOMBAG_ROLL_DURATION = 2000
 
 export const HOSTILE_WIDTH = .5
