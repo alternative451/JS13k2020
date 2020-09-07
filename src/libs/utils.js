@@ -40,6 +40,8 @@ export const createRed = (ecs, pos, isActive, status) => {
 
 
 export const isPlayerOverlap = (playerPos, pos, hitBox) => {
-    return (playerPos.x + PLAYER_WIDTH > pos.x && playerPos.x < pos.x + hitBox.x
-        && playerPos.y > pos.y && playerPos.y < pos.y + hitBox.y)
+    return (
+        playerPos.x + PLAYER_WIDTH > pos.x && playerPos.x < pos.x + hitBox.x &&
+        playerPos.y + PLAYER_HEIGHT > pos.y && playerPos.y < pos.y + hitBox.y
+    )
 }

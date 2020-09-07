@@ -1,10 +1,11 @@
 import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable } from "./components"
-import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE } from "./config"
+import { BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
-import { drawBombCard, drawBomb, deadAgent, redAgent, bombAgent, drawExplodable, drawBombEffect } from "./draw_helpers"
+import { drawBombCard, drawBomb, deadAgent, redAgent, bombAgent, drawExplodable, drawBombEffect, drawSoil } from "./draw_helpers"
 
+import astar from "./libs/astar"
 export const control = (ecs) => {
     const selected = ecs.select(Pos, Controlable, Acc, Speed)
     const bombBagSelector = ecs.select(BombBag)
@@ -53,7 +54,7 @@ export const control = (ecs) => {
                                 .create()
                                 .add(
                                     bomb,
-                                    new Pos(pos.x, pos.y, 0),
+                                    new Pos(pos.x + PLAYER_WIDTH / 2, pos.y + PLAYER_HEIGHT / 2, 0),
                                     new Agent(bombAgent)
                                 )
                         }
@@ -71,6 +72,7 @@ export const drawAgent = (ecs, ctx) => {
     const selectedWalls = ecs.select(Wall)
     return {
         update : (dt) => {
+            drawSoil(ctx)
             
             selectedAgent.iterate((entityAgent) => {
                 const pos = entityAgent.get(Pos)
@@ -80,15 +82,15 @@ export const drawAgent = (ecs, ctx) => {
 
             selectedWalls.iterate((entityWall) => {
                 const wall = entityWall.get(Wall)
-                ctx.fillStyle = ""
+                ctx.fillStyle = "#030917"
                 ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
             /* add border walls */
             if(selectedWalls.list) {
                 ctx.fillRect(0, 0, X_TILE_COUNT * tileSize, tileSize)
                 ctx.fillRect(0, (Y_TILE_COUNT - 1) * tileSize, X_TILE_COUNT * tileSize, tileSize)
-                ctx.fillRect(0, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
-                ctx.fillRect((X_TILE_COUNT - 1) * tileSize, tileSize, tileSize, (Y_TILE_COUNT - 1) * tileSize)
+                ctx.fillRect(0, 0, tileSize, Y_TILE_COUNT * tileSize)
+                ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 0, tileSize, Y_TILE_COUNT * tileSize)
             }
            
         }
@@ -112,17 +114,18 @@ export const liveSpawn = (ecs, ctx) => {
                 } else if(spawner.cd > 0 && spawner.total > 0) {
                     // spawning load
                     ctx.beginPath()
-                    ctx.arc(pos.x * tileSize, pos.y * tileSize, spawner.cd / SPAWNER_CD * 20 + 10, 0, pi2)
+                  //  
                     ctx.closePath()
                     ctx.fillStyle = "rgba(255, 255, 255, .3)"
                     ctx.fill()
+
+                    //const rad = Math.ceil(spawner.cd / SPAWNER_CD * 3)
+                    //ctx.fillStyle = rad % 2 === 0 ? "#000" : "#fff"
+                    //ctx.fillRect((pos.x * tileSize) - (rad * tileSize / 2), (pos.y * tileSize) - (rad * tileSize / 2),rad * tileSize, rad * tileSize)
                 }
 
-                ctx.beginPath()
-                ctx.arc(pos.x * tileSize, pos.y * tileSize, 10, 0, pi2)
-                ctx.closePath()
-                ctx.fillStyle = spawner.total > 0 ? "rgba(255, 255, 255, .3)" : "rgba(0, 0, 0, .3)"
-                ctx.fill()
+                ctx.fillStyle = "#000"
+                ctx.fillRect(pos.x * tileSize, pos.y * tileSize , tileSize , tileSize)
             }) 
         }
     }
@@ -169,7 +172,7 @@ export const ia = (ecs) => {
                             ecs.create()
                                 .add(
                                     new PreBlast(hostile, performance.now()),
-                                    new Pos(hostilePos.x, hostilePos.y, hostilePos.z)
+                                    new Pos(hostilePos.x + RED_WIDTH / 2, hostilePos.y + RED_HEIGHT / 2, hostilePos.z)
                                 )
                         }
                     }
@@ -234,6 +237,7 @@ export const trialDisplay = (ecs, ctx) => {
                 ctx.font = "50px sans-serif"
                 ctx.fillStyle = "rgba(100, 170, 220)"
                 const txt = trialState.sc.replace("%remain", remaining)
+                ctx.fillStyle = "#9E622B"
                 ctx.fillText(txt, pos.x * tileSize, pos.y * tileSize)
             })
         }
@@ -549,11 +553,13 @@ export const liveDoors = (ecs, ctx) => {
     const doorSelector = ecs.select(Door, Pos)
     const playerSelector = ecs.select(Player, Pos)
     const spawnerSelector = ecs.select(Spawn)
-    let remaining = -1
+    let remaining = 0
+    let hasHostiles = false
     return {
         update: () => {
-            remaining = -1
+            remaining = 0
             spawnerSelector.iterate((spawnerEntities) => {
+                hasHostiles = true
                 remaining += spawnerEntities.get(Spawn).remaining()
             })
             playerSelector.iterate((playerEntity) => {
@@ -561,9 +567,8 @@ export const liveDoors = (ecs, ctx) => {
                 const playerPos = playerEntity.get(Pos)
                 doorSelector.iterate((doorEntity) => {
                     const pos = doorEntity.get(Pos)
-                    const isOpen = remaining === 0 || remaining === -1
+                    const isOpen = remaining === 0 && hasHostiles
                     ctx.fillStyle = isOpen ? "#31cd39" : "#9e333d"
-
                     switch(pos.x) { 
                         case 0://top
                             ctx.fillRect(5 * tileSize, 0 * tileSize, 4 * tileSize, tileSize); break
@@ -573,7 +578,7 @@ export const liveDoors = (ecs, ctx) => {
                                playerPos.x = 1
 
                             }
-                            ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 3 * tileSize, tileSize, 4 * tileSize); break
+                            ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 4 * tileSize, tileSize, 4 * tileSize); break
                         case 2: //bottom
                             ctx.fillRect(5 * tileSize, (Y_TILE_COUNT - 1) * tileSize, 4 * tileSize, tileSize); break
                         case 3: //left
@@ -652,6 +657,23 @@ export const liveExplosions = (ecs, ctx) => {
                             ctx.fillStyle = `rgba(255,255,255, 1)`
                             ctx.fill()
                             break
+                        }
+
+                        
+                        // sfx
+                        switch(explosion.bombType) {
+                            case ATOMIC_BOMB_TYPE:
+                            case DETECT_BOMB_TYPE:
+                            case TURTLE_BOMB_TYPE:
+                                const adv = explosion.remaining / EXPLOSION_SFX_DURATION
+                                ctx.beginPath()
+                                ctx.arc(pos.x * tileSize, pos.y * tileSize, (1+adv) * tileSize * 2, 0, pi2)
+                                ctx.strokeStyle = `rgba(255,255,255,${(adv) * 0.5})`
+                                ctx.lineWidth = 4
+                                ctx.stroke()
+                                ctx.beginPath()
+                                ctx.arc(pos.x * tileSize, pos.y * tileSize, (1-adv) * tileSize * 3, 0, pi2)
+                                ctx.stroke()
                         }
 
                     

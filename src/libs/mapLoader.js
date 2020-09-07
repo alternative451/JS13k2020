@@ -41,23 +41,23 @@ const process = (map, ecs, cv) => {
         const start = new Pos(startObjects[0].x, startObjects[0].y)
         createPlayer(ecs, new Pos(start.x,start.y,0))
     }
+    if(map.properties) {
+        const bombsProperties = map.properties.find((propertie) => propertie.name === "bombs")
 
-    const bombsProperties = map.properties.find((propertie) => propertie.name === "bombs")
-
-    if(bombsProperties) {
-        const bombs = bombsProperties.value.split(",").map((bomb) => parseInt(bomb, 10))
-        ecs.select(BombBag).iterate((bombBagEntity) => {
-            bombBagEntity.get(BombBag).set(bombs)
-        })
-    }
-    const canRollProperties = map.properties.find((propertie) => propertie.name === "canRoll")
-
-    if(canRollProperties) {
-        ecs.select(BombBag).iterate((bombBagEntity) => {
-            bombBagEntity.get(BombBag).canRoll = canRollProperties.value
-        })
-    }
+        if(bombsProperties) {
+            const bombs = bombsProperties.value.split(",").map((bomb) => parseInt(bomb, 10))
+            ecs.select(BombBag).iterate((bombBagEntity) => {
+                bombBagEntity.get(BombBag).set(bombs)
+            })
+        }
+        const canRollProperties = map.properties.find((propertie) => propertie.name === "canRoll")
     
+        if(canRollProperties) {
+            ecs.select(BombBag).iterate((bombBagEntity) => {
+                bombBagEntity.get(BombBag).canRoll = canRollProperties.value
+            })
+        }
+    }
  
     // door
     ecs.create() 
