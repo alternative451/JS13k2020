@@ -5,7 +5,7 @@ import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
 import { drawBombCard, drawBomb, deadAgent, redAgent, bombAgent, drawExplodable, drawBombEffect, drawSoil } from "./draw_helpers"
 
-import astar from "./libs/astar"
+import {astar, Graph} from "./libs/astar"
 export const control = (ecs) => {
     const selected = ecs.select(Pos, Controlable, Acc, Speed)
     const bombBagSelector = ecs.select(BombBag)
@@ -131,13 +131,32 @@ export const liveSpawn = (ecs, ctx) => {
     }
 }
 
-export const ia = (ecs) => {
+export const ia = (ecs, ctx) => {
     const hostileSelector = ecs.select(Pos, Hostile)
     const playerSelector = ecs.select(Pos, Player)
+    const wallSelector = ecs.select(Wall)
     return {
         update : (dt) => {
+            const mappedGrid = []
+            for(let i = 0; i < X_TILE_COUNT; i ++) {
+                mappedGrid[i] = []
+                for(let j = 0; j < Y_TILE_COUNT; j ++) {
+                    mappedGrid[i].push(1)
+                }
+            }
+
+            wallSelector.iterate((entityWall) => {
+                const wall = entityWall.get(Wall)
+                mappedGrid[wall.x][wall.y] = 0
+            })
+            
+            const graph = new Graph(mappedGrid)
+
             playerSelector.iterate((playerEntity) => {
                 const playerPos = playerEntity.get(Pos) 
+
+                
+
                 hostileSelector.iterate((entity) => {
                     const hostile = entity.get(Hostile)
                     if(hostile.effect) {
@@ -159,9 +178,31 @@ export const ia = (ecs) => {
                         } else if(hostile.effect === HOSTILE_EFFECT_DISORIENTED) {
                             // do nothing; TODO may change direction
                         } else {
-                            const d = playerPos.clone()
-                            const b = d.sub(hostilePos)
-                            hostileSpeed.set(b.normalise().multiplyScalar(HOSTILE_SPEED))
+                            let res = []
+                            if(hostilePos) {
+                                res = astar.search(graph, graph.grid[Math.floor(playerPos.x)][Math.floor(playerPos.y)], 
+                                graph.grid[Math.floor(hostilePos.x)][Math.floor(hostilePos.y)])
+                           
+                                res.forEach((brick) => {
+                                ctx.fillStyle = "rgba(0,0,0,.2)"                                    
+                                ctx.fillRect(brick.x * tileSize, brick.y * tileSize, tileSize, tileSize)
+                            })
+                            }
+                            
+                            let nextPos
+                            if(res.length > 1) {
+                                nextPos = new Pos(res[res.length - 2].x + 0.5, res[res.length - 2].y + 0.5, 0)
+                            } else {
+                                nextPos = playerPos.clone()
+                            }
+                            
+                            ctx.fillStyle = "rgba(155,0,0,1)"                                    
+                            ctx.fillRect(nextPos.x * tileSize, nextPos.y * tileSize, 20, 20)
+
+                            
+                            const nextMove = nextPos.sub(hostilePos)
+                            console.log(nextMove)
+                            hostileSpeed.set(nextMove.normalise().multiplyScalar(HOSTILE_SPEED))
                         }
                         
                         // try an attack
