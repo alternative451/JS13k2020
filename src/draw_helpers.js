@@ -137,11 +137,10 @@ export const drawBombEffect = (bomb, pos, ctx) => {
     
     // time
     ctx.beginPath()
-    ctx.moveTo(pos.x, pos.y)
-    ctx.lineTo(pos.x, pos.y - (bomb.radius * tileSize / 2))
     ctx.arc(pos.x, pos.y, bomb.radius * tileSize / 2, -Math.PI / 2,  -Math.PI / 2 + (bomb.total - bomb.remaining) / bomb.total * pi2)
-    ctx.lineTo(pos.x, pos.y)
-    ctx.fill()
+    ctx.strokeStyle = "rgba(255, 255, 255, .3)"
+    ctx.lineWidth = tileSize / 2
+    ctx.stroke()
 }
 
 export const blueAgent = (pos, ctx, agent) => { // you

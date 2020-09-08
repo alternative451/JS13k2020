@@ -8,14 +8,15 @@ export class Speed extends Vector {}
 export class Acc extends Vector {}
 
 export class Spawn {
-    constructor(ecs, max, total) {
+    constructor(ecs, max, total, type) {
+        this.type = type
         this.cd = SPAWNER_CD
         this.maxHostiles = max
         this.total = total
         this.hostiles = []
 
         for(let i = 0; i < this.maxHostiles; i ++) {
-            this.hostiles.push(createRed(ecs, new Pos(0, 0, 0), false, null, HOSTILE_TYPE_RANGE))
+            this.hostiles.push(createRed(ecs, new Pos(0, 0, 0), false, null, type))
         }
     }
     remaining() {
@@ -144,10 +145,10 @@ export class Hostile {
 }
 
 export class PreBlast {
-    constructor(hostile, at, type) {
+    constructor(hostile, remaining, type) {
         this.hostile = hostile
         this.type = type
-        this.at = at
+        this.remaining = remaining
     }
 }
 

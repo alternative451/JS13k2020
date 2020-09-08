@@ -3,7 +3,7 @@ import Home from "../assets/maps/home.json"
 
 import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable, UI, Player, PreBlast, Blast } from "../components"
 import { createPlayer, createRed } from "./utils"
-import { X_TILE_COUNT } from "../config" 
+import { X_TILE_COUNT, HOSTILE_TYPE_PPAOE } from "../config" 
 
 const getObjects = (objectName, objects, ...properties) => {
     return objects.reduce((accs, current) => {
@@ -68,12 +68,12 @@ const process = (map, ecs, cv) => {
     
 
     // spawns
-    const spawnObjects = getObjects("isSpawn", objects, "max", "total")
+    const spawnObjects = getObjects("isSpawn", objects, "max", "total", "type")
     spawnObjects.forEach((spawnObject) => {
         ecs
         .create()
         .add(
-            new Spawn(ecs, spawnObject.max, spawnObject.total),
+            new Spawn(ecs, spawnObject.max, spawnObject.total, spawnObject.type ? spawnObject.type : HOSTILE_TYPE_PPAOE),
             new Pos(spawnObject.x, spawnObject.y, 0),
         )
     })

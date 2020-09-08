@@ -27,7 +27,6 @@ export const createPlayer = (ecs, pos) =>  {
 }
 
 export const createRed = (ecs, pos, isActive, status, type) => {
-    console.log(type)
     const red = ecs.create()
     red.add(
         new Hostile(null, type, isActive, status), 

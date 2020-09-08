@@ -13,7 +13,7 @@ export const RED_HEIGHT = 1
 
 export const BOMB_PROPERTIES_RADIUS = 3 
 export const BOMB_PROPERTIES_TIMER = 2500
-export const BOMB_PROPERTIES_MAX_TIMER = 10000
+export const BOMB_PROPERTIES_MAX_TIMER = 5000
 
 export const EXPLOSION_SFX_DURATION = 300
 export const EXPLOSION_SFX_COUNT = 9
@@ -25,7 +25,7 @@ export const PREBLAST_SFX_LINE_COUNT = 16
 export const BOMBAG_ROLL_DURATION = 2000
 
 export const HOSTILE_WIDTH = .5
-export const HOSTILE_SPEED = .1
+export const HOSTILE_SPEED = .07
 export const HOSTILE_BOMB_DAMAGE = 15
 export const SPAWNER_CD = 1000
 
@@ -37,6 +37,7 @@ export const HOSTILE_EFFECT_FREEZE = 0
 export const HOSTILE_EFFECT_DISORIENTED = 1
 export const HOSTILE_EFFECT_SLEEP = 3
 export const HOSTILE_EFFECT_RELOAD = 4
+export const HOSTILE_EFFECT_RELOAD_TIME = 3000
 
 export const HOSTILE_SLEEP_AWAKE_RANGE = 2
 
@@ -44,6 +45,7 @@ export const DEAD_LIVE = 3000
 
 export const BLAST_RADIUS = 2
 export const PRE_BLAST_DURATION = 500
+
 export const BLAST_DURATION = 300
 
 
