@@ -29,10 +29,15 @@ export const HOSTILE_SPEED = .1
 export const HOSTILE_BOMB_DAMAGE = 15
 export const SPAWNER_CD = 1000
 
+export const HOSTILE_TYPE_PPAOE = 0
+export const HOSTILE_TYPE_RANGE = 1
+
 export const HOSTILE_EFFECT_NONE = -1
 export const HOSTILE_EFFECT_FREEZE = 0
 export const HOSTILE_EFFECT_DISORIENTED = 1
 export const HOSTILE_EFFECT_SLEEP = 3
+export const HOSTILE_EFFECT_RELOAD = 4
+
 export const HOSTILE_SLEEP_AWAKE_RANGE = 2
 
 export const DEAD_LIVE = 3000

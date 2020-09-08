@@ -1,5 +1,5 @@
 import { Vector } from "./libs/vector"
-import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, DETECT_BOMB_TYPE, BOMB_PROPERTIES_MAX_TIMER, TURTLE_BOMB_TYPE } from "./config"
+import { PLAYER_WIDTH, HOSTILE_SPEED, HOSTILE_WIDTH, PLAYER_HEIGHT, SPAWNER_CD , EXPLOSION_SFX_COUNT, BOMB_PROPERTIES_TIMER, BOMB_PROPERTIES_RADIUS, EXPLOSION_SFX_DURATION, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, DETECT_BOMB_TYPE, BOMB_PROPERTIES_MAX_TIMER, TURTLE_BOMB_TYPE, HOSTILE_TYPE_RANGE } from "./config"
 import { pi2, createRed } from "./libs/utils"
 import { redAgent } from "./draw_helpers"
 
@@ -15,7 +15,7 @@ export class Spawn {
         this.hostiles = []
 
         for(let i = 0; i < this.maxHostiles; i ++) {
-            this.hostiles.push(createRed(ecs, new Pos(0, 0, 0), false))
+            this.hostiles.push(createRed(ecs, new Pos(0, 0, 0), false, null, HOSTILE_TYPE_RANGE))
         }
     }
     remaining() {
@@ -144,8 +144,9 @@ export class Hostile {
 }
 
 export class PreBlast {
-    constructor(hostile, at) {
+    constructor(hostile, at, type) {
         this.hostile = hostile
+        this.type = type
         this.at = at
     }
 }

@@ -1,5 +1,5 @@
 import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable } from "./components"
-import { PREBLAST_SFX_LINE_COUNT, BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./config"
+import { HOSTILE_EFFECT_RELOAD, PREBLAST_SFX_LINE_COUNT, BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, HOSTILE_TYPE_PPAOE, HOSTILE_TYPE_RANGE } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
@@ -214,21 +214,31 @@ export const ia = (ecs, ctx) => {
 
                             
                             const nextMove = nextPos.sub(hostilePos)
-                            console.log(nextMove)
                             hostileSpeed.set(nextMove.normalise().multiplyScalar(HOSTILE_SPEED))
                         }
                         
                         // try an attack
-                        if (playerPos.distance2D(hostilePos) < 1 && !hostile.isAttacking && 
-                            hostile.effect !== HOSTILE_EFFECT_NONE
-                        ) {
-                            hostile.isAttacking = true
-                            ecs.create()
-                                .add(
-                                    new PreBlast(hostile, performance.now()),
-                                    new Pos(hostilePos.x + RED_WIDTH / 2, hostilePos.y + RED_HEIGHT / 2, hostilePos.z)
-                                )
+                        if (!hostile.isAttacking && hostile.effect !== HOSTILE_EFFECT_RELOAD) {
+
+                            if (playerPos.distance2D(hostilePos) < 1 && hostile.type === HOSTILE_TYPE_PPAOE &&
+                                hostile.effect !== HOSTILE_EFFECT_NONE
+                            ) {
+                                hostile.isAttacking = true
+                                ecs.create()
+                                    .add(
+                                        new PreBlast(hostile, performance.now(), HOSTILE_TYPE_PPAOE),
+                                        new Pos(hostilePos.x + RED_WIDTH / 2, hostilePos.y + RED_HEIGHT / 2, hostilePos.z)
+                                    )
+                            } else if (!hostile.isAttacking && hostile.type === HOSTILE_TYPE_RANGE) {
+                                hostile.isAttacking = true
+                                ecs.create()
+                                    .add(
+                                        new PreBlast(hostile, performance.now(), HOSTILE_TYPE_RANGE),
+                                        new Pos(hostilePos.x + RED_WIDTH / 2, hostilePos.y + RED_HEIGHT / 2, hostilePos.z)
+                                    )
+                            }
                         }
+
                     }
                 })
             })
@@ -246,43 +256,76 @@ export const livePreBlast = (ecs, ctx, cv) => {
             selected.iterate((preblasEntity) => {
                 const preblast = preblasEntity.get(PreBlast)
                 const pos = preblasEntity.get(Pos)
-                ctx.beginPath()
-                ctx.arc(pos.x * tileSize, pos.y * tileSize, tileSize * BLAST_RADIUS, 0, pi2)
-                ctx.lineWidth = 2
-                ctx.closePath()
-                ctx.strokeStyle = "#971313"
-                ctx.stroke()
-                const bRadius = tileSize * BLAST_RADIUS
-                const dY = 2 * bRadius / (PREBLAST_SFX_LINE_COUNT + 1)
-                for(let i = 0; i < PREBLAST_SFX_LINE_COUNT; i ++) {
-                    const y = dY * (i + 1) - bRadius
-                    const x = Math.sqrt(bRadius * bRadius - y * y)
-                    const lX = pos.x * tileSize - x
-                    const rX = pos.x * tileSize + x
-                    const endY = pos.y * tileSize + y 
+                if (preblasEntity.type === HOSTILE_TYPE_PPAOE) {
                     ctx.beginPath()
-                    ctx.moveTo(lX, endY)
-                    ctx.lineTo(rX,endY)
+                    ctx.arc(pos.x * tileSize, pos.y * tileSize, tileSize * BLAST_RADIUS, 0, pi2)
+                    ctx.lineWidth = 2
+                    ctx.closePath()
+                    ctx.strokeStyle = "#971313"
                     ctx.stroke()
-                }
-                if (performance.now() - preblast.at > PRE_BLAST_DURATION ) {
-                    selectedPlayer.iterate((playerEntity) => {
-                        const playerPos = playerEntity.get(Pos)
-                        const player = playerEntity.get(Player)
-                        if (pos.distance2D(playerPos) < BLAST_RADIUS) {
-                            player.hp -= HOSTILE_BOMB_DAMAGE
-                        }
-                    })
+                    const bRadius = tileSize * BLAST_RADIUS
+                    const dY = 2 * bRadius / (PREBLAST_SFX_LINE_COUNT + 1)
+                    var cosA = Math.cos(1);
+                    var sinA = Math.sin(1);
+                    for (let i = 0; i < PREBLAST_SFX_LINE_COUNT; i++) {
+                        const y = dY * (i + 1) - bRadius
+                        const x = Math.sqrt(bRadius * bRadius - y * y)
+
+                        const lX = y * tileSize * sinA + x * tileSize * cosA + pos.x * tileSize
+                        const rX = y * tileSize * sinA - x * tileSize * cosA + pos.x * tileSize
+                        const lY = y * tileSize * cosA - x * tileSize * sinA + pos.y * tileSize
+                        const rY = y * tileSize * cosA + x * tileSize * sinA + pos.y * tileSize
+
+                        ctx.beginPath()
+                        ctx.moveTo(lX, lY)
+                        ctx.lineTo(rX, rY)
+                        ctx.stroke()
+                    }
+                    if (performance.now() - preblast.at > PRE_BLAST_DURATION) {
+                        selectedPlayer.iterate((playerEntity) => {
+                            const playerPos = playerEntity.get(Pos)
+                            const player = playerEntity.get(Player)
+                            if (pos.distance2D(playerPos) < BLAST_RADIUS) {
+                                player.hp -= HOSTILE_BOMB_DAMAGE
+                            }
+                        })
 
 
-                    preblast.hostile.isAttacking = false
-                    preblasEntity.eject()
-                    ecs.create()
-                    .add(
-                        new Pos(pos.x, pos.y, pos.z),
-                        new Blast(performance.now())
-                    )
+                        preblast.hostile.isAttacking = false
+                        preblasEntity.eject()
+                        ecs.create()
+                            .add(
+                                new Pos(pos.x, pos.y, pos.z),
+                                new Blast(performance.now())
+                            )
+                    }
+                } else {
+                    for(let i = 0; i < X_TILE_COUNT; i ++) {
+                        ctx.fillStyle = "red"
+                        ctx.fillRect(i * tileSize, pos.y * tileSize, tileSize, tileSize)
+                    }
+
+                    if (performance.now() - preblast.at > PRE_BLAST_DURATION) {
+                        selectedPlayer.iterate((playerEntity) => {
+                            const playerPos = playerEntity.get(Pos)
+                            const player = playerEntity.get(Player)
+                            
+                        })
+
+
+                        preblast.hostile.isAttacking = false
+                        preblast.hostile.effect = HOSTILE_EFFECT_RELOAD
+                        preblast.hostile.effectTime = performance.now()
+                        preblasEntity.eject()
+                        ecs.create()
+                            .add(
+                                new Pos(pos.x, pos.y, pos.z),
+                                new Blast(performance.now(), HOSTILE_TYPE_RANGE)
+                            )
+                    }
+                    
                 }
+                
             })
         }
     }

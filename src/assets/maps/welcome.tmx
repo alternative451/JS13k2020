@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="5">
- <editorsettings>
-  <export target="welcome.json" format="json"/>
- </editorsettings>
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="5">
  <properties>
   <property name="bombs" value="1,1,1"/>
   <property name="canRoll" type="bool" value="false"/>
@@ -21,34 +18,20 @@
    </properties>
    <text fontfamily="MS Shell Dlg 2" pixelsize="3" wrap="1">Move with zqsd or wasd</text>
   </object>
-  <object id="3" x="15.1117" y="7.05213">
-   <properties>
-    <property name="isSpawn" type="bool" value="true"/>
-    <property name="max" type="int" value="2"/>
-    <property name="total" type="int" value="11"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="4" x="15.3995" y="9.57075">
-   <properties>
-    <property name="isDestroyable" type="bool" value="true"/>
-   </properties>
-   <point/>
-  </object>
  </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
-0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
-0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
-0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,
-0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
-0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
-0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,1036,1036,0,0,0,0,0,0,0,0,0,0,0,0,1162,1162,0,0,0,
+0,0,0,1036,1036,0,0,0,0,0,0,0,0,0,0,0,0,1162,1162,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1162,1162,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1162,1162,0,0,0,
+0,0,0,1162,1162,0,0,0,0,0,0,0,0,0,0,0,0,1162,1162,0,0,0,
+0,0,0,1162,1162,0,0,0,0,0,0,0,0,0,0,0,0,1162,1162,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
