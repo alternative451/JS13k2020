@@ -1,6 +1,8 @@
 import welcome from "../assets/maps/welcome.json"
 import level1 from "../assets/maps/level1_bombs.json"
 import level2 from "../assets/maps/level2_bombsMoove.json"
+import level3 from "../assets/maps/level3_flashice.json"
+
 
 
 import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable, UI, Player, PreBlast, Blast } from "../components"
@@ -143,7 +145,7 @@ const cleanMap = (ecs) => {
 }
 
 export const mapLoader = (ecs) => {
-    const maps = [welcome, level1, level2]
+    const maps = [welcome, level3, level1, level2]
     let currentMap = -1
     
     return {

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="5">
+ <editorsettings>
+  <export format="json"/>
+ </editorsettings>
+ <properties>
+  <property name="bombs" value="4,4,4"/>
+ </properties>
+ <tileset firstgid="1" source="aos.tsx"/>
+ <objectgroup id="2" name="Calque d'Objets 1">
+  <object id="2" x="7.95653" y="2.84783" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Kill them all (%remain)</text>
+  </object>
+  <object id="4" x="19.6522" y="5.69565">
+   <properties>
+    <property name="isSpawn" type="bool" value="true"/>
+    <property name="max" type="int" value="1"/>
+    <property name="total" type="int" value="5"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <layer id="1" name="Calque de Tuiles 1" width="22" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,903,903,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,903,903,0,
+0,903,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,903,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,903,903,903,903,903,903,903,903,903,903,0,0,0,0,0,0,
+0,0,0,0,0,0,903,903,903,903,903,903,903,903,903,903,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,903,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,903,0,
+0,903,903,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,903,903,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

@@ -371,7 +371,7 @@ export const trialDisplay = (ecs, ctx) => {
 
     return {
         update: () => {
-            let remaining = -1
+            let remaining = 0
             spawnerSelector.iterate((spawnerEntities) => {
                 remaining += spawnerEntities.get(Spawn).remaining()
             })
@@ -381,7 +381,7 @@ export const trialDisplay = (ecs, ctx) => {
                 ctx.textAlign = "center"
                 ctx.font = "50px sans-serif"
                 ctx.fillStyle = "rgba(100, 170, 220)"
-                const txt = trialState.sc.replace("%remain", remaining)
+                const txt = trialState.sc.replace("%remain", remaining === 0 ? "clear" : remaining)
                 ctx.fillStyle = "#9E622B"
                 ctx.fillText(txt, pos.x * tileSize, pos.y * tileSize)
             })
