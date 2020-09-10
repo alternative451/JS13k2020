@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="4">
+ <editorsettings>
+  <export target="level1_bombs.json" format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" source="aos.tsx"/>
+ <objectgroup id="2" name="Calque d'Objets 1">
+  <object id="1" x="11.3014" y="10.0217">
+   <properties>
+    <property name="isDestroyable" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" x="10.8696" y="2.63043" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Press [space] to destroy objective</text>
+  </object>
+  <object id="3" x="10.7283" y="8.09782" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">(The black square)</text>
+  </object>
+ </objectgroup>
+ <layer id="1" name="Calque de Tuiles 1" width="22" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,649,649,649,649,649,649,649,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,649,649,649,649,649,649,649,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,131,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,131,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,131,0,0,0,0,0,131,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,131,0,0,0,0,0,131,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

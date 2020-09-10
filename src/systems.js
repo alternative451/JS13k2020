@@ -696,37 +696,41 @@ export const liveBlast = (ecs, ctx) => {
 export const liveDoors = (ecs, ctx) => {
     const doorSelector = ecs.select(Door, Pos)
     const playerSelector = ecs.select(Player, Pos)
-    const spawnerSelector = ecs.select(Spawn)
-    let remaining = 0
-    let hasHostiles = false
+    const hostileSelector = ecs.select(Hostile)
+    const explodableSelector = ecs.select(Explodable)
+
+    let alives
+    let destroyableNotDestroyed
     return {
         update: () => {
-            remaining = 0
-            spawnerSelector.iterate((spawnerEntities) => {
-                hasHostiles = true
-                remaining += spawnerEntities.get(Spawn).remaining()
+            alives = 0
+            hostileSelector.iterate((hostileEntity) => {
+                alives += hostileEntity.get(Hostile).isActive ? 1 : 0
             })
+            destroyableNotDestroyed = 0
+            explodableSelector.iterate((explodableEntities) => {
+                destroyableNotDestroyed += explodableEntities.get(Explodable).exploded ? 0 : 1
+            })
+
             playerSelector.iterate((playerEntity) => {
                 
                 const playerPos = playerEntity.get(Pos)
                 doorSelector.iterate((doorEntity) => {
                     const pos = doorEntity.get(Pos)
-                    const isOpen = remaining === 0 && hasHostiles
+                    const isOpen = alives === 0 && destroyableNotDestroyed === 0
                     ctx.fillStyle = isOpen ? "#31cd39" : "#9e333d"
                     switch(pos.x) { 
                         case 0://top
                             ctx.fillRect(5 * tileSize, 0 * tileSize, 4 * tileSize, tileSize); break
                         case 1: //right
+                            ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 4 * tileSize, tileSize, 4 * tileSize); 
+
                             if(isOpen && isPlayerOverlap(playerPos, new Vector(X_TILE_COUNT - 1, 3), new Vector(1, 4))) {
                                window.mapLoader.next()
-                               playerPos.x = 1
-
+                                playerPos.x = 1
                             }
                             if(isOpen) {
-
-                           
-                                ctx.fillRect((X_TILE_COUNT - 1) * tileSize, 4 * tileSize, tileSize, 4 * tileSize); 
-                                    const arrowPos = new Pos((X_TILE_COUNT - 3) * tileSize, 5 * tileSize + tileSize / 2)
+                                const arrowPos = new Pos((X_TILE_COUNT - 3) * tileSize, 5 * tileSize + tileSize / 2)
                                 ctx.beginPath()
                                 ctx.moveTo(arrowPos.x, arrowPos.y)
                                 ctx.lineTo(arrowPos.x + tileSize, arrowPos.y)

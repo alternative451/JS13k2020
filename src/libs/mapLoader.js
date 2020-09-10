@@ -1,5 +1,7 @@
 import welcome from "../assets/maps/welcome.json"
-import Home from "../assets/maps/home.json"
+import level1 from "../assets/maps/level1_bombs.json"
+import level2 from "../assets/maps/level2_bombsMoove.json"
+
 
 import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable, UI, Player, PreBlast, Blast } from "../components"
 import { createPlayer, createRed } from "./utils"
@@ -7,6 +9,7 @@ import { X_TILE_COUNT, HOSTILE_TYPE_PPAOE } from "../config"
 
 const getObjects = (objectName, objects, ...properties) => {
     return objects.reduce((accs, current) => {
+        if(!current.properties) return accs
         const object = current.properties.find((propertie) => {
             return propertie.name === objectName
         })
@@ -46,6 +49,8 @@ const process = (map, ecs, cv) => {
 
         if(bombsProperties) {
             const bombs = bombsProperties.value.split(",").map((bomb) => parseInt(bomb, 10))
+        console.log(bombs)
+
             ecs.select(BombBag).iterate((bombBagEntity) => {
                 bombBagEntity.get(BombBag).set(bombs)
             })
@@ -65,7 +70,7 @@ const process = (map, ecs, cv) => {
         new Door(),
         new Pos(1)
     )
-    
+
 
     // spawns
     const spawnObjects = getObjects("isSpawn", objects, "max", "total", "type")
@@ -80,7 +85,7 @@ const process = (map, ecs, cv) => {
 
     const reds = getObjects("isRed", objects, "status")
     reds.forEach((red) => {
-        createRed(ecs, new Pos(red.x, red.y, 0), true, red.status)
+        createRed(ecs, new Pos(red.x, red.y, 0), true, parseInt(red.status, 10))
     })
     
     const destroyables = getObjects("isDestroyable", objects)
@@ -96,10 +101,10 @@ const process = (map, ecs, cv) => {
 
     
     // Text
-    const textObject = objects.find((object) => {
+    const textObjects = objects.filter((object) => {
         return object.text && object.text.text.length > 0
     })
-    if(textObject) {
+    textObjects.forEach((textObject) => {
         ecs
         .create()
         .add(
@@ -107,7 +112,9 @@ const process = (map, ecs, cv) => {
             new Pos(textObject.x, textObject.y),
             new Controlable(),
         )
-    }
+    })
+       
+
     // walls
     const tiles = map.layers[1]
     tiles.data.forEach((element, index) => {
@@ -135,7 +142,7 @@ const cleanMap = (ecs) => {
 }
 
 export const mapLoader = (ecs) => {
-    const maps = [welcome, Home]
+    const maps = [welcome, level1, level2]
     let currentMap = -1
     
     return {

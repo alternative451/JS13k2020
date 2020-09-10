@@ -38,11 +38,17 @@ ecs.process(drawAgent(ecs, ctx), trialDisplay(ecs, ctx), control(ecs),
 
 (async () => {
   const melodieCurry = await Sound(melodie)
-   
+  let soundHandle = null 
+  let isCurry = false
   cv.onclick = () => {
-    const soundHandle = melodieCurry(true)
+    if(isCurry) return
+    soundHandle = melodieCurry(true)
+    isCurry = true
   }
-  
+  s.onclick = () => {
+    soundHandle.stop() 
+  }
+
 })()
 
 window.currentScreen = title(ecs, cv)
