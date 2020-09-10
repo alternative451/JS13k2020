@@ -44,13 +44,14 @@ const process = (map, ecs, cv) => {
         const start = new Pos(startObjects[0].x, startObjects[0].y)
         createPlayer(ecs, new Pos(start.x,start.y,0))
     }
+    ecs.select(BombBag).iterate((bombBagEntity) => {
+        bombBagEntity.get(BombBag).canRoll = true
+    })
     if(map.properties) {
         const bombsProperties = map.properties.find((propertie) => propertie.name === "bombs")
 
         if(bombsProperties) {
             const bombs = bombsProperties.value.split(",").map((bomb) => parseInt(bomb, 10))
-        console.log(bombs)
-
             ecs.select(BombBag).iterate((bombBagEntity) => {
                 bombBagEntity.get(BombBag).set(bombs)
             })
