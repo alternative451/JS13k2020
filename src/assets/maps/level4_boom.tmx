@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="7">
+ <editorsettings>
+  <export target="level4_boom.json" format="json"/>
+ </editorsettings>
+ <properties>
+  <property name="bombs" value="4,4,4"/>
+ </properties>
+ <tileset firstgid="1" source="aos.tsx"/>
+ <objectgroup id="2" name="Calque d'Objets 1">
+  <object id="2" x="10.0435" y="6.97826" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">(%remain)</text>
+  </object>
+  <object id="4" x="19.6522" y="5.69565">
+   <properties>
+    <property name="isSpawn" type="bool" value="true"/>
+    <property name="max" type="int" value="1"/>
+    <property name="total" type="int" value="5"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" x="9.95652" y="1.8913" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Alarm is fire !</text>
+  </object>
+  <object id="6" x="19.8696" y="9.17391">
+   <properties>
+    <property name="isSpawn" type="bool" value="true"/>
+    <property name="max" type="int" value="1"/>
+    <property name="total" type="int" value="5"/>
+    <property name="type" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <layer id="1" name="Calque de Tuiles 1" width="22" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,903,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,903,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,903,903,903,903,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,903,903,903,903,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,903,903,903,903,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,903,903,903,903,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,903,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,903,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

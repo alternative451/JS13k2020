@@ -2,6 +2,8 @@ import welcome from "../assets/maps/welcome.json"
 import level1 from "../assets/maps/level1_bombs.json"
 import level2 from "../assets/maps/level2_bombsMoove.json"
 import level3 from "../assets/maps/level3_flashice.json"
+import level4 from "../assets/maps/level4_boom.json"
+import level5 from "../assets/maps/level5_boss.json"
 
 
 
@@ -86,9 +88,9 @@ const process = (map, ecs, cv) => {
         )
     })
 
-    const reds = getObjects("isRed", objects, "status")
+    const reds = getObjects("isRed", objects, "status", "type")
     reds.forEach((red) => {
-        createRed(ecs, new Pos(red.x, red.y, 0), true, parseInt(red.status, 10), HOSTILE_TYPE_PPAOE)
+        createRed(ecs, new Pos(red.x, red.y, 0), true, parseInt(red.status, 10), red.type ? red.type : HOSTILE_TYPE_PPAOE)
     })
     
     const destroyables = getObjects("isDestroyable", objects)
@@ -145,7 +147,7 @@ const cleanMap = (ecs) => {
 }
 
 export const mapLoader = (ecs) => {
-    const maps = [welcome, level3, level1, level2]
+    const maps = [welcome,level5, level4, level3, level1, level2]
     let currentMap = -1
     
     return {
@@ -167,6 +169,8 @@ export const mapLoader = (ecs) => {
             currentMap++
             if(currentMap < maps.length ) {
                 process(maps[currentMap], ecs)
+            } else {
+                
             }
         }
     }

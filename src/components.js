@@ -135,6 +135,7 @@ export const EXPLODE_TYPE = 1
 export class Hostile {
     constructor(target, type, isActive, effect) {
         this.target = target
+        this.hp = 100
         this.isActive = isActive
         this.type = type
         this.isAttacking = false

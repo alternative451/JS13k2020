@@ -1,5 +1,5 @@
-import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable } from "./components"
-import { HOSTILE_EFFECT_RELOAD_TIME, HOSTILE_EFFECT_RELOAD, PREBLAST_SFX_LINE_COUNT, BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, HOSTILE_TYPE_PPAOE, HOSTILE_TYPE_RANGE } from "./config"
+import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable, BombSlot } from "./components"
+import { HOSTILE_EFFECT_RELOAD_TIME, HOSTILE_EFFECT_RELOAD, PREBLAST_SFX_LINE_COUNT, BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, HOSTILE_TYPE_PPAOE, HOSTILE_TYPE_RANGE, HOSTILE_TYPE_BOSS, PRE_BLAST_BOSS_DURATION } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
 import { dieScreen } from "./screens"
@@ -190,11 +190,11 @@ export const ia = (ecs, ctx) => {
                         const hostileSpeed = entity.get(Speed)
 
                         // move toward player if no attacking
-                        if(hostile.isAttacking || hostile.effect === HOSTILE_EFFECT_FREEZE) {
+                        if((hostile.isAttacking && hostile.type !== HOSTILE_TYPE_BOSS) || hostile.effect === HOSTILE_EFFECT_FREEZE) {
                             hostileSpeed.setScalar(0)
                         } else if(hostile.effect === HOSTILE_EFFECT_DISORIENTED) {
                             // do nothing; TODO may change direction
-                        } else if(hostile.type === HOSTILE_TYPE_PPAOE || (hostile.type === HOSTILE_TYPE_RANGE && hostilePos.distance2D(playerPos) > 7)) {
+                        } else if((hostile.type === HOSTILE_TYPE_PPAOE || hostile.type === HOSTILE_TYPE_BOSS) || (hostile.type === HOSTILE_TYPE_RANGE && hostilePos.distance2D(playerPos) > 7)) {
                             let res = []
                             if(hostilePos) {
                                 res = astar.search(graph, graph.grid[Math.floor(playerPos.x + .5)][Math.floor(playerPos.y + .5)], 
@@ -218,7 +218,8 @@ export const ia = (ecs, ctx) => {
                         // try an attack
                         if (!hostile.isAttacking && hostile.effect !== HOSTILE_EFFECT_RELOAD) {
 
-                            if (playerPos.distance2D(hostilePos) < 1 && hostile.type === HOSTILE_TYPE_PPAOE &&
+                            if (playerPos.distance2D(hostilePos) < 2 
+                            && hostile.type === HOSTILE_TYPE_PPAOE &&
                                 hostile.effect !== HOSTILE_EFFECT_NONE
                             ) {
                                 hostile.isAttacking = true
@@ -234,6 +235,15 @@ export const ia = (ecs, ctx) => {
                                         new PreBlast(hostile, PRE_BLAST_DURATION, HOSTILE_TYPE_RANGE),
                                         new Pos(hostilePos.x + RED_WIDTH / 2, hostilePos.y + RED_HEIGHT / 2, hostilePos.z)
                                     )
+                            } else if(hostile.type === HOSTILE_TYPE_BOSS) {
+                                hostile.isAttacking = true
+                                for(let i = 0; i < 4; i ++) {
+                                    ecs.create()
+                                    .add(
+                                        new PreBlast(hostile, PRE_BLAST_BOSS_DURATION, HOSTILE_TYPE_PPAOE),
+                                        new Pos(Math.random() * X_TILE_COUNT, Math.random() * Y_TILE_COUNT, 0)
+                                    )
+                                }
                             }
                         }
 
@@ -285,7 +295,8 @@ export const livePreBlast = (ecs, ctx, cv) => {
                     }
                     ctx.beginPath()
                     ctx.fillStyle = "rgba(245, 88, 21, .3)"
-                    ctx.arc(pos.x * tileSize, pos.y * tileSize, (1 - preblast.remaining / PRE_BLAST_DURATION) * tileSize * BLAST_RADIUS, 0, pi2)
+                    const tot = preblast.hostile.type === HOSTILE_TYPE_PPAOE ? PRE_BLAST_DURATION : PRE_BLAST_BOSS_DURATION
+                    ctx.arc(pos.x * tileSize, pos.y * tileSize, (1 - preblast.remaining / tot) * tileSize * BLAST_RADIUS, 0, pi2)
                     ctx.fill()
                     preblast.remaining -= dt
 
@@ -436,6 +447,8 @@ export const liveBombs = (ecs, ctx) => {
                                     } else if(bomb.type === FLASH_BOMB_TYPE) {
                                         hostile.effect = HOSTILE_EFFECT_DISORIENTED
                                         hostile.effectTime = HOSTILE_DISORIENTED_TIME
+                                    } else if(hostile.type === HOSTILE_TYPE_BOSS && hostile.hp > 0){
+                                        hostile.hp -= 15
                                     } else {
                                         hostile.isActive = false
                                         hostile.effect = false
@@ -763,6 +776,8 @@ export const liveDoors = (ecs, ctx) => {
 
 export const liveHp = (ecs, ctx, cv) => {
     const playerSelector = ecs.select(Player)
+    const hostileSelector = ecs.select(Hostile)
+
     const uiPos = new Vector((X_TILE_COUNT / 2 * tileSize) - 210, 10)
 
     return {
@@ -785,6 +800,20 @@ export const liveHp = (ecs, ctx, cv) => {
                     ctx.fillStyle = "#fff"
                     ctx.fillText("HP", uiPos.x + 15, uiPos.y + 33)
 
+                }
+            })
+            hostileSelector.iterate((hostileEntity) => {
+                if(hostileEntity.get(Hostile).type === HOSTILE_TYPE_BOSS) {
+                    console.log("ssss")
+                    ctx.fillStyle = "#000"
+                    ctx.fillRect(uiPos.x, uiPos.y + 40, 420, 15)
+                    ctx.fillStyle = "red"
+                    ctx.fillRect(uiPos.x + 10, uiPos.y + 45, hostileEntity.get(Hostile).hp * 4, 5)
+                    ctx.font='400 22px Arial';
+                    ctx.fillStyle = "#000"
+                    ctx.fillText("BOSS", uiPos.x + 17 , uiPos.y + 55)
+                    ctx.fillStyle = "#fff"
+                    ctx.fillText("BOSS", uiPos.x + 15, uiPos.y + 55)
                 }
             })
         }

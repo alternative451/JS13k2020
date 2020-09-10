@@ -3,9 +3,6 @@
  <editorsettings>
   <export target="level1_bombs.json" format="json"/>
  </editorsettings>
- <properties>
-  <property name="0" type="int" value="0"/>
- </properties>
  <tileset firstgid="1" source="aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
   <object id="1" x="11.3014" y="10.0217">

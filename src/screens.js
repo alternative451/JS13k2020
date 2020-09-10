@@ -61,5 +61,28 @@ export const title = (ecs, cv) => {
             }
             
         }
+        export const credit = (ecs, tileSize, cv) => {
+            const text = [
+                "Win 404 JS132020",
+                "Thanks to Anouk for support & music",
+                "To Finn",
+                "To Max",
+                "To kutuluk for ECS code",
+                "To kutuluk for ECS code",
+            ]
+            return {
+                isGame: false,
+                
+                load : () => {
+                    ecs.create()
+                        .add(new UI("",cv.width / 2 - 150, cv.height / 2, () => { }, false))
+                    
+                },
+                unload : () => {
+                    cleanScreen(ecs)
+                }
+            }
+            
+        }
     
 

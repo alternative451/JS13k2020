@@ -31,6 +31,8 @@ export const SPAWNER_CD = 1000
 
 export const HOSTILE_TYPE_PPAOE = 0
 export const HOSTILE_TYPE_RANGE = 1
+export const HOSTILE_TYPE_BOSS = 2
+
 
 export const HOSTILE_EFFECT_NONE = -1
 export const HOSTILE_EFFECT_FREEZE = 0
@@ -45,6 +47,7 @@ export const DEAD_LIVE = 3000
 
 export const BLAST_RADIUS = 2
 export const PRE_BLAST_DURATION = 500
+export const PRE_BLAST_BOSS_DURATION = 1000
 
 export const BLAST_DURATION = 300
 
