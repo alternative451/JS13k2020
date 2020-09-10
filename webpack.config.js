@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 //const ClosurePlugin = require('closure-webpack-plugin');
 
 
-const env = "production"
+const env ="production"
 
 module.exports = {
   /*optimization: {

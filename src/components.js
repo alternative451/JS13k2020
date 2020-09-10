@@ -133,14 +133,13 @@ export class Dead {
 
 export const EXPLODE_TYPE = 1
 export class Hostile {
-    constructor(target, type, isActive, status) {
-        this.status = status
+    constructor(target, type, isActive, effect) {
         this.target = target
         this.isActive = isActive
         this.type = type
         this.isAttacking = false
-        this.effect = null
-        this.effectTime = 0
+        this.effect = effect
+        this.effectTime = 10 * 1000
     }
 }
 

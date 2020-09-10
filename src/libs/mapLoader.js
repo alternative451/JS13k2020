@@ -85,7 +85,7 @@ const process = (map, ecs, cv) => {
 
     const reds = getObjects("isRed", objects, "status")
     reds.forEach((red) => {
-        createRed(ecs, new Pos(red.x, red.y, 0), true, parseInt(red.status, 10))
+        createRed(ecs, new Pos(red.x, red.y, 0), true, parseInt(red.status, 10), HOSTILE_TYPE_PPAOE)
     })
     
     const destroyables = getObjects("isDestroyable", objects)

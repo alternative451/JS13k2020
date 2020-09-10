@@ -178,10 +178,14 @@ export const ia = (ecs, ctx) => {
                     if(hostile.effectTime < 0 && hostile.effect) {
                         hostile.effect = false
                     }
-                    if (hostile.status === HOSTILE_EFFECT_SLEEP) {
-                        return
+                    if (hostile.effect === HOSTILE_EFFECT_SLEEP) {
+                        const hostilePos = entity.get(Pos)
+                        if(hostilePos.distance2D(playerPos) < 5) {
+                            hostile.effect = HOSTILE_EFFECT_NONE
+                            hostile.effectTime = 0
+                        }
                     }
-                    if (hostile.isActive) {
+                    if (hostile.isActive && hostile.effect !== HOSTILE_EFFECT_SLEEP) {
                         const hostilePos = entity.get(Pos)
                         const hostileSpeed = entity.get(Speed)
 
@@ -420,8 +424,9 @@ export const liveBombs = (ecs, ctx) => {
                                 const hostilePos = hostileEntity.get(Pos)
                                 const hostileSpeed = hostileEntity.get(Speed)
                                 const hostile = hostileEntity.get(Hostile)
-                                if(hostile.status === HOSTILE_EFFECT_SLEEP) {
-                                    hostile.status = null
+                                if(hostile.effect === HOSTILE_EFFECT_SLEEP) {
+                                    hostile.effect = HOSTILE_EFFECT_NONE
+                                    hostile.effectTime = 0
                                 }
                                 
                                 if (hostilePos.distance2D(pos) < bomb.radius) {

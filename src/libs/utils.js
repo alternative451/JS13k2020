@@ -26,10 +26,10 @@ export const createPlayer = (ecs, pos) =>  {
     )
 }
 
-export const createRed = (ecs, pos, isActive, status, type) => {
+export const createRed = (ecs, pos, isActive, effect, type) => {
     const red = ecs.create()
     red.add(
-        new Hostile(null, type, isActive, status), 
+        new Hostile(null, type, isActive, effect), 
         new Pos(pos.x, pos.y, pos.z), 
         new Agent(redAgent), 
         new Speed(0, 0, 0), 
