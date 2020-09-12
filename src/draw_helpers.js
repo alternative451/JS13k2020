@@ -185,16 +185,16 @@ export const drawExplodable = (ctx, pos, explodableEntity) => {
 }
 
 export const drawPowup = (pos, ctx) => {
-    ctx.fillStyle = "#000"
+    ctx.fillStyle = "#40A86D"
     ctx.fillRect(pos.x, pos.y, tileSize, tileSize)
     ctx.beginPath()
-    ctx.moveTo(pos.x + tileSize / 4, pos.y + tileSize / 4)
+    ctx.moveTo(pos.x + tileSize * (3 / 8), pos.y + tileSize / 4)
     ctx.lineTo(pos.x + tileSize / 2, pos.y + tileSize / 2)
-    ctx.lineTo(pos.x + tileSize * (3 / 4), pos.y + tileSize / 4)
+    ctx.lineTo(pos.x + tileSize * (5 / 8), pos.y + tileSize / 4)
     ctx.lineTo(pos.x + tileSize * (3 / 4), pos.y + tileSize / 2)
     ctx.lineTo(pos.x + tileSize / 2, pos.y + tileSize * ( 3 / 4))
     ctx.lineTo(pos.x + tileSize / 4, pos.y + tileSize / 2)
-    ctx.fillStyle = "green"
+    ctx.fillStyle = "#9e333d"
 
 
     ctx.closePath()
@@ -202,6 +202,8 @@ export const drawPowup = (pos, ctx) => {
 }
 
 export const drawEyes = (pos, ctx, eye) => {
+    ctx.lineWidth = 2
+
     if (eye === EYE_DEAD) {
         ctx.strokeStyle = "#FFF"
         ctx.moveTo(pos.x + .2 * tileSize, pos.y + .2 * tileSize)

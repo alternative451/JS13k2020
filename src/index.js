@@ -26,7 +26,7 @@ window.addEventListener("resize", () => {
 
 
 const ctx = cv.getContext("2d") 
-window.mapLoader = mapLoader(ecs)
+window.mapLoader = mapLoader(ecs, cv)
 ecs.register(Pos, Speed, Acc, Controlable, TrialState, Bomb, Player, Hostile, Spawn, UI, Wall,
   Collidable, Dead, BombBag, PreBlast, Blast, Door, Explosion, Agent, Explodable, PowUp)
 

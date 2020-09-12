@@ -11,6 +11,7 @@ import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile
 import { createPlayer, createRed } from "./utils"
 import { X_TILE_COUNT, HOSTILE_TYPE_PPAOE } from "../config" 
 import { drawPowup } from "../draw_helpers"
+import { credit } from "../screens"
 
 const getObjects = (objectName, objects, ...properties) => {
     return objects.reduce((accs, current) => {
@@ -160,7 +161,7 @@ const cleanMap = (ecs) => {
     })
 }
 
-export const mapLoader = (ecs) => {
+export const mapLoader = (ecs, cv) => {
     const maps = [welcome, level1, level2, level3, level4, level5]
     let currentMap = -1
     
@@ -184,7 +185,8 @@ export const mapLoader = (ecs) => {
             if(currentMap < maps.length ) {
                 process(maps[currentMap], ecs)
             } else {
-                
+                window.currentScreen.unload()
+                window.currentScreen = credit(ecs, cv).load()
             }
         }
     }

@@ -440,7 +440,7 @@ export const liveBombs = (ecs, ctx) => {
                                 if (hostilePos.distance2D(pos) < bomb.radius) {
                                     if(bomb.type === FREEZE_BOMB_TYPE) {
                                         hostile.effect = HOSTILE_EFFECT_FREEZE
-                                        hostile.freezeTime = HOSTILE_FREEZE_TIME
+                                        hostile.effectTime = HOSTILE_FREEZE_TIME
                                     } else if(hostile.type === HOSTILE_TYPE_BOSS && hostile.hp > 0){
                                         hostile.hp -= 15
                                     } else {
@@ -528,13 +528,13 @@ export const liveUi = (ecs, ctx, cv) => {
                 }
                 ctx.font = `${tileSize}px Arial`
                 if (ui.isButton) {
-                    ctx.fillStyle = "#fff"
+                    ctx.fillStyle = "#DBD2C1"
                     ctx.fillRect(ui.x, ui.y, 300, 100)
                     ctx.textAlign = "center"
-                    ctx.fillStyle = "#000"
+                    ctx.fillStyle = "#fff"
                     ctx.fillText(ui.text, ui.x + 150, ui.y + 60)
                 } else {
-                    ctx.fillStyle = "#000"
+                    ctx.fillStyle = "#fff"
                     ctx.fillText(ui.text, ui.x + 150, ui.y + 50)
                 }
                
@@ -599,12 +599,14 @@ export const collide = (ecs, ctx) => {
                         } else if(fPos.y + box.yMin > wall.y && fPos.y + box.yMin < wall.y + 1) {
                             // top right point collide
                             if(speed.angle() > new Vector((fPos.x + box.xMax) - wall.x, (fPos.y + box.yMax) - (wall.y + 1)).angle()) {
+                               console.log("h wall")
                                 // with horiztona wall
-                                pos.y = wall.y + box.xMax
+                                pos.y = wall.y + box.yMax
                                 pos.x += speed.x * ((fPos.y - pos.y)  / speed.y)
                                 speed.y = -speed.y
                                 collided = true
                             } else {
+                                console.log("v wall")
                                 // with vertical wall
                                 pos.x = wall.x - box.xMax
                                 pos.y += speed.y * ((fPos.x - pos.x)  / speed.x)
@@ -751,6 +753,7 @@ export const liveDoors = (ecs, ctx) => {
                                 ctx.lineTo(arrowPos.x + tileSize, arrowPos.y + tileSize + tileSize / 2)
                                 ctx.lineTo(arrowPos.x +tileSize, arrowPos.y + tileSize) 
                                 ctx.lineTo(arrowPos.x, arrowPos.y + tileSize) 
+                                ctx.closePath()
                                 ctx.fill()
 
                             }

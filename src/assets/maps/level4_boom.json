@@ -24,7 +24,7 @@
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":1,
-                     "text":"%remain red left",
+                     "text":"%remain hostiles left",
                      "wrap":true
                     },
                  "type":"",
@@ -111,6 +111,42 @@
                  "width":0,
                  "x":19.8696,
                  "y":9.17391
+                }, 
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isPowUp",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":11.0085558724397,
+                 "y":1.93933108633653
+                }, 
+                {
+                 "height":0,
+                 "id":8,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isPowUp",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":10.9800362976407,
+                 "y":8.92662691210785
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -131,7 +167,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":7,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "properties":[
         {
