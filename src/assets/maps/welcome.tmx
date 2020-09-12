@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="left-up" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="6">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="9">
  <editorsettings>
   <export target="welcome.json" format="json"/>
  </editorsettings>
@@ -15,11 +15,11 @@
    </properties>
    <point/>
   </object>
-  <object id="2" x="10.8364" y="3.23701" width="108" height="19">
+  <object id="2" x="10.8364" y="5.19954" width="108" height="19">
    <properties>
     <property name="doors" type="int" value="2"/>
    </properties>
-   <text fontfamily="MS Shell Dlg 2" pixelsize="3" wrap="1">Move with zqsd or wasd</text>
+   <text fontfamily="MS Shell Dlg 2" pixelsize="3" wrap="1">Move with ZQSD or WASD</text>
   </object>
  </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">

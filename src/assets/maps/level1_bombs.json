@@ -22,16 +22,21 @@
                  "point":true,
                  "properties":[
                         {
-                         "name":"isDestroyable",
+                         "name":"isRed",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"status",
+                         "type":"int",
+                         "value":3
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":11.3014,
-                 "y":10.0217
+                 "x":12.2425459683692,
+                 "y":2.54957140264454
                 }, 
                 {
                  "height":19,
@@ -42,32 +47,55 @@
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":1,
-                     "text":"Press [space] to destroy objective",
+                     "text":"Press [space] to drop a bomb",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":10.8695695652174,
-                 "y":2.63043391304348
+                 "x":10.8902280788177,
+                 "y":2.30123146486907
+                }, 
+                {
+                 "height":0,
+                 "id":4,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isRed",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"status",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":11.3793103448276,
+                 "y":9.98185117967332
                 }, 
                 {
                  "height":19,
-                 "id":3,
+                 "id":5,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":1,
-                     "text":"(The black square)",
+                     "text":"The red ones detect hostiles, yellow have a timer",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":10.7282613043478,
-                 "y":8.09782173913043
+                 "x":10.8750810215193,
+                 "y":4.10369355009782
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -88,16 +116,16 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":4,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "properties":[
         {
-         "name":"0",
-         "type":"int",
-         "value":0
+         "name":"bombs",
+         "type":"string",
+         "value":"0,2,2"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {

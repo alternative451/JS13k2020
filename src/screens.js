@@ -47,9 +47,9 @@ export const title = (ecs, cv) => {
                 isGame: false,
                 load : () => {
                     ecs.create()
-                        .add(new UI("You died",cv.width / 2 - 150, cv.height / 2, () => { }, false))
+                        .add(new UI("404 Life not found !",cv.width / 2 - 150, cv.height / 2, () => { }, false))
                     ecs.create()
-                        .add(new UI("Restart",cv.width / 2 - 150, cv.height / 2 + 150, () => {
+                        .add(new UI("Restart ?",cv.width / 2 - 150, cv.height / 2 + 150, () => {
                             window.currentScreen.unload()
                             window.currentScreen = gameScreen(ecs)
                             window.mapLoader.init()

@@ -1,4 +1,4 @@
-{ "compressionlevel":-1,
+{ "compressionlevel":0,
  "editorsettings":
     {
      "export":
@@ -48,14 +48,14 @@
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":3,
-                     "text":"Move with zqsd or wasd",
+                     "text":"Move with ZQSD or WASD",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
                  "width":108,
                  "x":10.8364,
-                 "y":3.23701
+                 "y":5.19954345227475
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -76,7 +76,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":6,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -90,7 +90,7 @@
          "value":false
         }],
  "renderorder":"left-up",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {

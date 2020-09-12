@@ -1,21 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="4">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="6">
  <editorsettings>
   <export target="level1_bombs.json" format="json"/>
  </editorsettings>
+ <properties>
+  <property name="bombs" value="0,2,2"/>
+ </properties>
  <tileset firstgid="1" source="aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
-  <object id="1" x="11.3014" y="10.0217">
+  <object id="1" x="12.2425" y="2.54957">
    <properties>
-    <property name="isDestroyable" type="bool" value="true"/>
+    <property name="isRed" type="bool" value="true"/>
+    <property name="status" type="int" value="3"/>
    </properties>
    <point/>
   </object>
-  <object id="2" x="10.8696" y="2.63043" width="108" height="19">
-   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Press [space] to destroy objective</text>
+  <object id="2" x="10.8902" y="2.30123" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Press [space] to drop a bomb</text>
   </object>
-  <object id="3" x="10.7283" y="8.09782" width="108" height="19">
-   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">(The black square)</text>
+  <object id="4" x="11.3793" y="9.98185">
+   <properties>
+    <property name="isRed" type="bool" value="true"/>
+    <property name="status" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" x="10.8751" y="4.10369" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">The red ones detect hostiles, yellow have a timer</text>
   </object>
  </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">

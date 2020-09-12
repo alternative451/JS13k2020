@@ -7,9 +7,10 @@ import level5 from "../assets/maps/level5_boss.json"
 
 
 
-import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable, UI, Player, PreBlast, Blast } from "../components"
+import { Door, Pos, BombBag, TrialState, Controlable, Wall, Load, Spawn, Hostile, Dead, Bomb, Explodable, Collidable, UI, Player, PreBlast, Blast, PowUp, Agent } from "../components"
 import { createPlayer, createRed } from "./utils"
 import { X_TILE_COUNT, HOSTILE_TYPE_PPAOE } from "../config" 
+import { drawPowup } from "../draw_helpers"
 
 const getObjects = (objectName, objects, ...properties) => {
     return objects.reduce((accs, current) => {
@@ -75,6 +76,19 @@ const process = (map, ecs, cv) => {
         new Door(),
         new Pos(1)
     )
+    
+
+    // powups
+
+    const powups = getObjects("isPowUp", objects)
+    powups.forEach((powup) => {
+        ecs.create()
+            .add(
+                new PowUp(),
+                new Pos(powup.x, powup.y, 0),
+                new Agent(drawPowup)
+            )
+    })
 
 
     // spawns
@@ -134,7 +148,7 @@ const process = (map, ecs, cv) => {
 } 
 
 const cleanMap = (ecs) => {
-    const Entities = [Explodable ,Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb, PreBlast, Blast]
+    const Entities = [Explodable ,Wall, Spawn, TrialState, Hostile, Door, Dead, Bomb, PreBlast, Blast, PowUp]
     Entities.forEach((entityName) => {
         ecs.select(entityName).iterate((entityEntity) => {
             entityEntity.eject()
@@ -147,7 +161,7 @@ const cleanMap = (ecs) => {
 }
 
 export const mapLoader = (ecs) => {
-    const maps = [welcome,level5, level4, level3, level1, level2]
+    const maps = [welcome, level1, level2, level3, level4, level5]
     let currentMap = -1
     
     return {

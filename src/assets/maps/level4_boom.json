@@ -3,7 +3,8 @@
     {
      "export":
         {
-         "format":"json"
+         "format":"json",
+         "target":"level4_boom.json"
         }
     },
  "height":12,
@@ -23,14 +24,14 @@
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":1,
-                     "text":"(%remain)",
+                     "text":"%remain red left",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":10.0434826086957,
-                 "y":6.97826
+                 "x":10.9846459683692,
+                 "y":9.2883455587244
                 }, 
                 {
                  "height":0,
@@ -51,17 +52,17 @@
                         {
                          "name":"total",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":19.6521739130435,
-                 "y":5.69565217391304
+                 "x":19.6522,
+                 "y":5.69565
                 }, 
                 {
-                 "height":19,
+                 "height":17.9732953072336,
                  "id":5,
                  "name":"",
                  "rotation":0,
@@ -69,14 +70,14 @@
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":1,
-                     "text":"Alarm is fire !",
+                     "text":"Some hostiles fire in line, but keep their distance",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
-                 "width":108,
-                 "x":9.95652173913043,
-                 "y":1.89130434782609
+                 "width":106.916256157635,
+                 "x":11.0402638423645,
+                 "y":2.9180046927664
                 }, 
                 {
                  "height":0,
@@ -97,7 +98,7 @@
                         {
                          "name":"total",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }, 
                         {
                          "name":"type",
@@ -108,8 +109,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":19.8695652173913,
-                 "y":9.17391304347826
+                 "x":19.8696,
+                 "y":9.17391
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -136,10 +137,10 @@
         {
          "name":"bombs",
          "type":"string",
-         "value":"4,4,4"
+         "value":"1,2,3"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {

@@ -1,4 +1,4 @@
-import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable, BombSlot } from "./components"
+import { Pos, Controlable, TrialState, Bomb, Hostile, Spawn, Player, Speed, UI, Wall, Collidable, Acc, BombBag, Dead, PreBlast, Blast, Door, Explosion, Agent, Explodable, BombSlot, PowUp } from "./components"
 import { HOSTILE_EFFECT_RELOAD_TIME, HOSTILE_EFFECT_RELOAD, PREBLAST_SFX_LINE_COUNT, BOMB_ARM_RADIUS, PLAYER_SPEED, X_TILE_COUNT, Y_TILE_COUNT, HOSTILE_SPEED, PLAYER_BASE_ACC, PLAYER_BASE_FRICTION, BLAST_DURATION, PRE_BLAST_DURATION, BLAST_RADIUS, HOSTILE_BOMB_DAMAGE, BOMBAG_ROLL_DURATION, SPAWNER_CD, EXPLOSION_SFX_SIZE, EXPLOSION_SFX_DURATION, ATOMIC_BOMB_TYPE, HOSTILE_FREEZE_TIME, FREEZE_BOMB_TYPE, FLASH_BOMB_TYPE, HOSTILE_DISORIENTED_TIME, HOSTILE_EFFECT_FREEZE, HOSTILE_EFFECT_DISORIENTED, DETECT_BOMB_TYPE, TIME_BOMB_DETONATE_DELAY, TURTLE_BOMB_TYPE, BOMB_COLLISON_RADIUS, HOSTILE_EFFECT_SLEEP, HOSTILE_EFFECT_NONE, RED_WIDTH, RED_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, HOSTILE_TYPE_PPAOE, HOSTILE_TYPE_RANGE, HOSTILE_TYPE_BOSS, PRE_BLAST_BOSS_DURATION } from "./config"
 import { clamp, pi2, isPlayerOverlap } from "./libs/utils"
 import { Vector } from "./libs/vector"
@@ -77,12 +77,13 @@ export const drawAgent = (ecs, ctx) => {
             selectedAgent.iterate((entityAgent) => {
                 const pos = entityAgent.get(Pos)
                 const agent = entityAgent.get(Agent)
-                agent.draw(pos.clone().multiplyScalar(tileSize), ctx, agent)
+                const h = entityAgent.get(Hostile)
+                agent.draw(pos.clone().multiplyScalar(tileSize), ctx, h)
             })
 
             selectedWalls.iterate((entityWall) => {
                 const wall = entityWall.get(Wall)
-                ctx.fillStyle = "#030917"
+                ctx.fillStyle = "#DBD2C1"
                 ctx.fillRect(wall.x * tileSize, wall.y * tileSize, tileSize, tileSize)
             })
             /* add border walls */
@@ -196,16 +197,19 @@ export const ia = (ecs, ctx) => {
                             // do nothing; TODO may change direction
                         } else if((hostile.type === HOSTILE_TYPE_PPAOE || hostile.type === HOSTILE_TYPE_BOSS) || (hostile.type === HOSTILE_TYPE_RANGE && hostilePos.distance2D(playerPos) > 7)) {
                             let res = []
-                            if(hostilePos) {
-                                res = astar.search(graph, graph.grid[Math.floor(playerPos.x + .5)][Math.floor(playerPos.y + .5)], 
-                                graph.grid[Math.floor(hostilePos.x)][Math.floor(hostilePos.y)])
-                        
-                            }
-                            
                             let nextPos
-                            if(res.length > 1) {
-                                nextPos = new Pos(res[res.length - 2].x + 0.5, res[res.length - 2].y + 0.5, 0)
-                            } else {
+
+                            try {
+                                if (hostilePos) {
+                                    res = astar.search(graph, graph.grid[Math.floor(playerPos.x + .5)][Math.floor(playerPos.y + .5)],
+                                    graph.grid[Math.floor(hostilePos.x)][Math.floor(hostilePos.y)])
+                                }
+                                if (res.length > 1) {
+                                    nextPos = new Pos(res[res.length - 2].x + 0.5, res[res.length - 2].y + 0.5, 0)
+                                } else {
+                                    nextPos = playerPos.clone()
+                                }
+                            } catch(e) {
                                 nextPos = playerPos.clone()
                             }
                             
@@ -390,10 +394,9 @@ export const trialDisplay = (ecs, ctx) => {
                 const trialState = entity.get(TrialState)
                 const pos = entity.get(Pos)
                 ctx.textAlign = "center"
-                ctx.font = "50px sans-serif"
-                ctx.fillStyle = "rgba(100, 170, 220)"
+                ctx.font = `${tileSize - 10}px sans-serif`
                 const txt = trialState.sc.replace("%remain", remaining === 0 ? "clear" : remaining)
-                ctx.fillStyle = "#9E622B"
+                ctx.fillStyle = "#DBD2C1"
                 ctx.fillText(txt, pos.x * tileSize, pos.y * tileSize)
             })
         }
@@ -417,7 +420,6 @@ export const liveBombs = (ecs, ctx) => {
                 switch(bomb.type) {
                     case ATOMIC_BOMB_TYPE:
                     case FREEZE_BOMB_TYPE:
-                    case FLASH_BOMB_TYPE:
                     case DETECT_BOMB_TYPE:
                     case TURTLE_BOMB_TYPE:
                         if(bomb.remaining < 0) {
@@ -434,19 +436,11 @@ export const liveBombs = (ecs, ctx) => {
                             hostileSelected.iterate((hostileEntity) => {
                                 const hostilePos = hostileEntity.get(Pos)
                                 const hostileSpeed = hostileEntity.get(Speed)
-                                const hostile = hostileEntity.get(Hostile)
-                                if(hostile.effect === HOSTILE_EFFECT_SLEEP) {
-                                    hostile.effect = HOSTILE_EFFECT_NONE
-                                    hostile.effectTime = 0
-                                }
-                                
+                                const hostile = hostileEntity.get(Hostile)                                
                                 if (hostilePos.distance2D(pos) < bomb.radius) {
                                     if(bomb.type === FREEZE_BOMB_TYPE) {
                                         hostile.effect = HOSTILE_EFFECT_FREEZE
                                         hostile.freezeTime = HOSTILE_FREEZE_TIME
-                                    } else if(bomb.type === FLASH_BOMB_TYPE) {
-                                        hostile.effect = HOSTILE_EFFECT_DISORIENTED
-                                        hostile.effectTime = HOSTILE_DISORIENTED_TIME
                                     } else if(hostile.type === HOSTILE_TYPE_BOSS && hostile.hp > 0){
                                         hostile.hp -= 15
                                     } else {
@@ -736,7 +730,7 @@ export const liveDoors = (ecs, ctx) => {
                 doorSelector.iterate((doorEntity) => {
                     const pos = doorEntity.get(Pos)
                     const isOpen = alives === 0 && destroyableNotDestroyed === 0
-                    ctx.fillStyle = isOpen ? "#31cd39" : "#9e333d"
+                    ctx.fillStyle = isOpen ? "#40A86D" : "#9e333d"
                     switch(pos.x) { 
                         case 0://top
                             ctx.fillRect(5 * tileSize, 0 * tileSize, 4 * tileSize, tileSize); break
@@ -792,19 +786,18 @@ export const liveHp = (ecs, ctx, cv) => {
                 } else {
                     ctx.fillStyle = "#000"
                     ctx.fillRect(uiPos.x, uiPos.y, 420, 50)
-                    ctx.fillStyle = "red"
+                    ctx.fillStyle = "#9e333d"
                     ctx.fillRect(uiPos.x + 10, uiPos.y + 10, playerComponent.hp * 4, 30)
                     ctx.font='400 22px Arial';
                     ctx.fillStyle = "#000"
-                    ctx.fillText("HP", uiPos.x + 17 , uiPos.y + 35)
+                    ctx.fillText("HP", uiPos.x + 27 , uiPos.y + 35)
                     ctx.fillStyle = "#fff"
-                    ctx.fillText("HP", uiPos.x + 15, uiPos.y + 33)
+                    ctx.fillText("HP", uiPos.x + 25, uiPos.y + 33)
 
                 }
             })
             hostileSelector.iterate((hostileEntity) => {
                 if(hostileEntity.get(Hostile).type === HOSTILE_TYPE_BOSS) {
-                    console.log("ssss")
                     ctx.fillStyle = "#000"
                     ctx.fillRect(uiPos.x, uiPos.y + 40, 420, 15)
                     ctx.fillStyle = "red"
@@ -850,12 +843,6 @@ export const liveExplosions = (ecs, ctx) => {
                             ctx.fillStyle = `rgba(0,0,255,${ 1 - explosion.remaining / EXPLOSION_SFX_DURATION})`
                             ctx.fill()
                             break
-                        case FLASH_BOMB_TYPE: 
-                            ctx.beginPath()
-                            ctx.arc(pos.x * tileSize, pos.y * tileSize, 2 * tileSize, 0, pi2)
-                            ctx.fillStyle = `rgba(255,255,255, 1)`
-                            ctx.fill()
-                            break
                         }
 
                         
@@ -891,6 +878,25 @@ export const liveExplodable = (ecs, ctx) => {
                 const explodable = explodableEntity.get(Explodable)
                 explodable.blink++
                 drawExplodable(ctx, pos, explodable)
+            })
+        }
+    }
+}
+
+export const livePowUp = (ecs) => {
+    const powUpSelector = ecs.select(PowUp)
+    const playerSelector = ecs.select(Player)
+    return {
+        update :(dt) => {
+            powUpSelector.iterate((powupEntity) => {
+                playerSelector.iterate((playerEntity) => {
+                    const powUpPos = powupEntity.get(Pos)
+                    const playerPos = playerEntity.get(Pos)
+                    if (isPlayerOverlap(playerPos, powUpPos, new Pos(1, 1, 0))) {
+                        playerEntity.get(Player).hp = Math.min(playerEntity.get(Player).hp + 30, 100)
+                        powupEntity.eject()
+                    }
+                })
             })
         }
     }

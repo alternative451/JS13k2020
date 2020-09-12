@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="5">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="6">
  <editorsettings>
   <export target="level2_bombsMoove.json" format="json"/>
  </editorsettings>
  <properties>
-  <property name="bombs" value="4,4,4"/>
+  <property name="bombs" value="3,3,3"/>
  </properties>
  <tileset firstgid="1" source="aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
-  <object id="2" x="7.95653" y="2.84783" width="108" height="19">
+  <object id="2" x="11.3315" y="6.09783" width="108" height="19">
    <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Green Bombs can be pushed</text>
   </object>
   <object id="4" x="19.6522" y="5.69565">
@@ -17,6 +17,9 @@
     <property name="status" type="int" value="3"/>
    </properties>
    <point/>
+  </object>
+  <object id="5" x="16.7835" y="8.69724" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Stay back, i'm asleep</text>
   </object>
  </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">

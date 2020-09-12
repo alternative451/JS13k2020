@@ -54,9 +54,8 @@ export const BLAST_DURATION = 300
 
 export const ATOMIC_BOMB_TYPE = 0
 export const FREEZE_BOMB_TYPE = 1
-export const FLASH_BOMB_TYPE = 2
-export const DETECT_BOMB_TYPE = 3
-export const TURTLE_BOMB_TYPE = 4 
+export const DETECT_BOMB_TYPE = 2
+export const TURTLE_BOMB_TYPE = 3 
 
 export const HOSTILE_FREEZE_TIME = 1100
 export const HOSTILE_DISORIENTED_TIME = 3300
@@ -66,3 +65,8 @@ export const TIME_BOMB_DETONATE_DELAY = 200
 export const LOADING_DURATION = 1000
 export const BOMB_COLLISON_RADIUS = .5
 export const BOMB_ARM_RADIUS = 1
+
+export const EYE_DEAD = 0
+export const EYE_BLUE = 1
+export const EYE_RED = 2
+export const EYE_LINE = 3

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="6">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="8">
  <editorsettings>
   <export target="level3_flashice.json" format="json"/>
  </editorsettings>
  <properties>
-  <property name="bombs" value="4,4,4"/>
+  <property name="bombs" value="1,1,1"/>
  </properties>
  <tileset firstgid="1" source="aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
-  <object id="2" x="7.95653" y="2.84783" width="108" height="19">
+  <object id="2" x="10.3315" y="3.34783" width="108" height="19">
    <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Kill them all (%remain)</text>
   </object>
   <object id="4" x="19.6522" y="5.69565">
@@ -18,6 +18,15 @@
     <property name="total" type="int" value="5"/>
    </properties>
    <point/>
+  </object>
+  <object id="6" x="6.52826" y="9.62102">
+   <properties>
+    <property name="isPowUp" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="7" x="10.5912" y="9.48305" width="108" height="19">
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Don't forget: Blue bombs freeze hostiles</text>
   </object>
  </objectgroup>
  <layer id="1" name="Calque de Tuiles 1" width="22" height="12">

@@ -1,9 +1,10 @@
-{ "compressionlevel":-1,
+{ "compressionlevel":0,
  "editorsettings":
     {
      "export":
         {
-         "format":"json"
+         "format":"json",
+         "target":"level3_flashice.json"
         }
     },
  "height":12,
@@ -29,8 +30,8 @@
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":7.95652608695652,
-                 "y":2.8478252173913
+                 "x":10.33153,
+                 "y":3.34783
                 }, 
                 {
                  "height":0,
@@ -57,8 +58,44 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":19.6521739130435,
-                 "y":5.69565217391304
+                 "x":19.6522,
+                 "y":5.69565
+                }, 
+                {
+                 "height":0,
+                 "id":6,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isPowUp",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":6.52826,
+                 "y":9.62102
+                }, 
+                {
+                 "height":19,
+                 "id":7,
+                 "name":"",
+                 "rotation":0,
+                 "text":
+                    {
+                     "fontfamily":"MS Shell Dlg 2",
+                     "pixelsize":1,
+                     "text":"Don't forget: Blue bombs freeze hostiles",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":108,
+                 "x":10.5912302307493,
+                 "y":9.48305029815919
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -79,16 +116,16 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":5,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "properties":[
         {
          "name":"bombs",
          "type":"string",
-         "value":"4,4,4"
+         "value":"1,1,1"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {

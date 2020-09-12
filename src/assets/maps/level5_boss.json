@@ -24,14 +24,14 @@
                     {
                      "fontfamily":"MS Shell Dlg 2",
                      "pixelsize":1,
-                     "text":"Is it the end ?",
+                     "text":"Drop all the bombs !",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":10.4347826086957,
-                 "y":5.67391304347826
+                 "x":10.4348,
+                 "y":5.67391
                 }, 
                 {
                  "height":0,
@@ -53,8 +53,44 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":11.4347826086957,
-                 "y":5.78260869565217
+                 "x":11.4348,
+                 "y":5.78261
+                }, 
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isPowUp",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":19.9066632097485,
+                 "y":8.84106818771066
+                }, 
+                {
+                 "height":0,
+                 "id":10,
+                 "name":"",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"isPowUp",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":19.9066632097485,
+                 "y":3.0801140782992
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -75,7 +111,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":9,
+ "nextobjectid":11,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -84,7 +120,7 @@
          "value":"3,3,3"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {

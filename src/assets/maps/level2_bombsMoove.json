@@ -30,8 +30,8 @@
                  "type":"",
                  "visible":true,
                  "width":108,
-                 "x":7.95652608695652,
-                 "y":2.8478252173913
+                 "x":11.33153,
+                 "y":6.09783
                 }, 
                 {
                  "height":0,
@@ -53,8 +53,26 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":19.6521739130435,
-                 "y":5.69565217391304
+                 "x":19.6522,
+                 "y":5.69565
+                }, 
+                {
+                 "height":19,
+                 "id":5,
+                 "name":"",
+                 "rotation":0,
+                 "text":
+                    {
+                     "fontfamily":"MS Shell Dlg 2",
+                     "pixelsize":1,
+                     "text":"Stay back, i'm asleep",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":108,
+                 "x":16.7834780917812,
+                 "y":8.69723878662173
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -75,16 +93,16 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":5,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "properties":[
         {
          "name":"bombs",
          "type":"string",
-         "value":"4,4,4"
+         "value":"3,3,3"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.4.1",
+ "tiledversion":"1.4.2",
  "tileheight":1,
  "tilesets":[
         {

@@ -214,7 +214,7 @@ export class BombSlot {
         return this.bomb
     }
     roll() {
-        this.type = Math.floor(Math.random() * 5)
+        this.type = Math.floor(Math.random() * 4)
         this.isAvailable = true
     }
     set(bomb) {
@@ -349,3 +349,4 @@ export class Explodable {
     }
 }
 
+export class PowUp {}

@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="9">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="11">
  <editorsettings>
   <export target="level5_boss.json" format="json"/>
  </editorsettings>
  <properties>
-  <property name="bombs" value="3,3,3"/>
+  <property name="bombs" value="2,3,3"/>
  </properties>
  <tileset firstgid="1" source="aos.tsx"/>
  <objectgroup id="2" name="Calque d'Objets 1">
   <object id="7" x="10.4348" y="5.67391" width="108" height="19">
-   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Is it the end ?</text>
+   <text fontfamily="MS Shell Dlg 2" pixelsize="1" wrap="1">Drop all the bombs !</text>
   </object>
   <object id="8" x="11.4348" y="5.78261">
    <properties>
     <property name="isRed" type="bool" value="true"/>
     <property name="type" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="9" x="19.9067" y="8.84107">
+   <properties>
+    <property name="isPowUp" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="10" x="19.9067" y="3.08011">
+   <properties>
+    <property name="isPowUp" type="bool" value="true"/>
    </properties>
    <point/>
   </object>
